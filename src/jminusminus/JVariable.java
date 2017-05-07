@@ -28,8 +28,8 @@ class JVariable extends JExpression implements JLhs {
      *            the name.
      */
 
-    public JVariable(int line, String name) {
-        super(line);
+    public JVariable(int line, int column, String name) {
+        super(line, column);
         this.name = name;
     }
 
@@ -71,24 +71,24 @@ class JVariable extends JExpression implements JLhs {
             Field field = definingType.fieldFor(name);
             if (field == null) {
                 type = Type.ANY;
-                JAST.compilationUnit.reportSemanticError(line,
+                JAST.compilationUnit.reportSemanticError(line, column,
                         "Cannot find name: " + name);
             } else {
                 // Rewrite a variable denoting a field as an
                 // explicit field selection
                 type = field.type();
-                JExpression newTree = new JFieldSelection(line(), field
+                JExpression newTree = new JFieldSelection(line(), column(), field
                         .isStatic()
                         || (context.methodContext() != null && context
                                 .methodContext().isStatic()) ? new JVariable(
-                        line(), definingType.toString()) : new JThis(line),
+                        line(),column(), definingType.toString()) : new JThis(line, column),
                         name);
                 return (JExpression) newTree.analyze(context);
             }
         } else {
             if (!analyzeLhs && iDefn instanceof LocalVariableDefn
                     && !((LocalVariableDefn) iDefn).isInitialized()) {
-                JAST.compilationUnit.reportSemanticError(line, "Variable "
+                JAST.compilationUnit.reportSemanticError(line, column, "Variable "
                         + name + " might not have been initialized");
             }
             type = iDefn.type();
@@ -111,7 +111,8 @@ class JVariable extends JExpression implements JLhs {
             // Could (now) be a JFieldSelection, but if it's
             // (still) a JVariable
             if (iDefn != null && !(iDefn instanceof LocalVariableDefn)) {
-                JAST.compilationUnit.reportSemanticError(line(), name
+                JAST.compilationUnit.reportSemanticError(line(), column(),
+                        name
                         + " is a bad lhs to a  =");
             }
         }

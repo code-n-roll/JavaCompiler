@@ -34,9 +34,9 @@ abstract class JBinaryExpression extends JExpression {
      *            the rhs operand.
      */
 
-    protected JBinaryExpression(int line, String operator, JExpression lhs,
+    protected JBinaryExpression(int line, int column, String operator, JExpression lhs,
             JExpression rhs) {
-        super(line);
+        super(line, column);
         this.operator = operator;
         this.lhs = lhs;
         this.rhs = rhs;
@@ -87,8 +87,8 @@ class JPlusOp extends JBinaryExpression {
      *            the rhs operand.
      */
 
-    public JPlusOp(int line, JExpression lhs, JExpression rhs) {
-        super(line, "+", lhs, rhs);
+    public JPlusOp(int line, int column, JExpression lhs, JExpression rhs) {
+        super(line, column, "+", lhs, rhs);
     }
 
     /**
@@ -106,13 +106,13 @@ class JPlusOp extends JBinaryExpression {
         lhs = (JExpression) lhs.analyze(context);
         rhs = (JExpression) rhs.analyze(context);
         if (lhs.type() == Type.STRING || rhs.type() == Type.STRING) {
-            return (new JStringConcatenationOp(line, lhs, rhs))
+            return (new JStringConcatenationOp(line, column, lhs, rhs))
                     .analyze(context);
         } else if (lhs.type() == Type.INT && rhs.type() == Type.INT) {
             type = Type.INT;
         } else {
             type = Type.ANY;
-            JAST.compilationUnit.reportSemanticError(line(),
+            JAST.compilationUnit.reportSemanticError(line(),column(),
                     "Invalid operand types for +");
         }
         return this;
@@ -158,8 +158,8 @@ class JSubtractOp extends JBinaryExpression {
      *            the rhs operand.
      */
 
-    public JSubtractOp(int line, JExpression lhs, JExpression rhs) {
-        super(line, "-", lhs, rhs);
+    public JSubtractOp(int line, int column, JExpression lhs, JExpression rhs) {
+        super(line, column, "-", lhs, rhs);
     }
 
     /**
@@ -174,8 +174,8 @@ class JSubtractOp extends JBinaryExpression {
     public JExpression analyze(Context context) {
         lhs = (JExpression) lhs.analyze(context);
         rhs = (JExpression) rhs.analyze(context);
-        lhs.type().mustMatchExpected(line(), Type.INT);
-        rhs.type().mustMatchExpected(line(), Type.INT);
+        lhs.type().mustMatchExpected(line(), column(), Type.INT);
+        rhs.type().mustMatchExpected(line(), column(), Type.INT);
         type = Type.INT;
         return this;
     }
@@ -216,8 +216,8 @@ class JMultiplyOp extends JBinaryExpression {
      *            the rhs operand.
      */
 
-    public JMultiplyOp(int line, JExpression lhs, JExpression rhs) {
-        super(line, "*", lhs, rhs);
+    public JMultiplyOp(int line, int column, JExpression lhs, JExpression rhs) {
+        super(line,column, "*", lhs, rhs);
     }
 
     /**
@@ -232,8 +232,8 @@ class JMultiplyOp extends JBinaryExpression {
     public JExpression analyze(Context context) {
         lhs = (JExpression) lhs.analyze(context);
         rhs = (JExpression) rhs.analyze(context);
-        lhs.type().mustMatchExpected(line(), Type.INT);
-        rhs.type().mustMatchExpected(line(), Type.INT);
+        lhs.type().mustMatchExpected(line(), column(), Type.INT);
+        rhs.type().mustMatchExpected(line(), column(), Type.INT);
         type = Type.INT;
         return this;
     }
@@ -256,15 +256,15 @@ class JMultiplyOp extends JBinaryExpression {
 }
 
 class JDivideOp extends JBinaryExpression {
-    public JDivideOp(int line, JExpression lhs, JExpression rhs){
-        super(line, "/", lhs, rhs);
+    public JDivideOp(int line, int column, JExpression lhs, JExpression rhs){
+        super(line, column,"/", lhs, rhs);
     }
 
     public JExpression analyze(Context context){
         lhs = (JExpression) lhs.analyze(context);
         rhs = (JExpression) rhs.analyze(context);
-        lhs.type().mustMatchExpected(line(), Type.INT);
-        rhs.type().mustMatchExpected(line(), Type.INT);
+        lhs.type().mustMatchExpected(line(), column(), Type.INT);
+        rhs.type().mustMatchExpected(line(), column(), Type.INT);
         type = Type.INT;
         return this;
     }
@@ -277,15 +277,15 @@ class JDivideOp extends JBinaryExpression {
 }
 
 class JDivideByModuleOp extends JBinaryExpression {
-    public JDivideByModuleOp(int line, JExpression lhs, JExpression rhs){
-        super(line, "%", lhs, rhs);
+    public JDivideByModuleOp(int line, int column, JExpression lhs, JExpression rhs){
+        super(line,column, "%", lhs, rhs);
     }
 
     public JExpression analyze(Context context){
         lhs = lhs.analyze(context);
         rhs = rhs.analyze(context);
-        lhs.type().mustMatchExpected(line(), Type.INT);
-        rhs.type().mustMatchExpected(line(), Type.INT);
+        lhs.type().mustMatchExpected(line(), column(),  Type.INT);
+        rhs.type().mustMatchExpected(line(), column(),  Type.INT);
         type = Type.INT;
         return this;
     }

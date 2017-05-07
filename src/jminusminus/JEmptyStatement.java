@@ -17,8 +17,8 @@ class JEmptyStatement extends JStatement {
      *            line in which the empty statement occurs in the source file.
      */
 
-    protected JEmptyStatement(int line) {
-        super(line);
+    protected JEmptyStatement(int line, int column) {
+        super(line, column);
     }
 
     /**

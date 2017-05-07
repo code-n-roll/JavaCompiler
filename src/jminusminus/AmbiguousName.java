@@ -38,6 +38,11 @@ class AmbiguousName {
      */
     private int line;
 
+    /**
+     * Column in which the ambiguous name occurs in the source file.
+     */
+    private int column;
+
     /** The ambiguous part, eg x.y */
     private String name;
 
@@ -51,8 +56,9 @@ class AmbiguousName {
      *            the ambiguous part.
      */
 
-    public AmbiguousName(int line, String name) {
+    public AmbiguousName(int line, int column, String name) {
         this.line = line;
+        this.column = column;
         this.name = name;
     }
 
@@ -77,11 +83,11 @@ class AmbiguousName {
         do {
             iDefn = context.lookup(newName);
             if (iDefn != null) {
-                result = new JVariable(line, newName);
+                result = new JVariable(line, column, newName);
                 break;
             } else if (!st.hasMoreTokens()) {
                 // Nothing found. :(
-                JAST.compilationUnit.reportSemanticError(line,
+                JAST.compilationUnit.reportSemanticError(line, column,
                         "Cannot find name " + newName);
                 return null;
             } else {
@@ -91,7 +97,7 @@ class AmbiguousName {
 
         // For now we can assume everything else is fields.
         while (st.hasMoreTokens()) {
-            result = new JFieldSelection(line, result, st.nextToken());
+            result = new JFieldSelection(line, column, result, st.nextToken());
         }
         return result;
     }

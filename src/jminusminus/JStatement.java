@@ -16,8 +16,8 @@ abstract class JStatement extends JAST {
      *            line in which the statement occurs in the source file.
      */
 
-    protected JStatement(int line) {
-        super(line);
+    protected JStatement(int line, int column) {
+        super(line, column);
     }
 
 }

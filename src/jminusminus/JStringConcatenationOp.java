@@ -27,8 +27,8 @@ class JStringConcatenationOp extends JBinaryExpression {
      *            rhs operand.
      */
 
-    public JStringConcatenationOp(int line, JExpression lhs, JExpression rhs) {
-        super(line, "+", lhs, rhs);
+    public JStringConcatenationOp(int line, int column, JExpression lhs, JExpression rhs) {
+        super(line, column, "+", lhs, rhs);
     }
 
     /**

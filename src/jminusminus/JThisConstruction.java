@@ -36,8 +36,8 @@ class JThisConstruction extends JExpression {
      *            the constructor's arguments.
      */
 
-    protected JThisConstruction(int line, ArrayList<JExpression> arguments) {
-        super(line);
+    protected JThisConstruction(int line, int column, ArrayList<JExpression> arguments) {
+        super(line, column);
         this.arguments = arguments;
     }
 
@@ -73,7 +73,8 @@ class JThisConstruction extends JExpression {
         }
 
         if (!properUseOfConstructor) {
-            JAST.compilationUnit.reportSemanticError(line(), "this"
+            JAST.compilationUnit.reportSemanticError(line(), column(),
+                    "this"
                     + Type.argTypesAsString(argTypes)
                     + " must be first statement in the constructor's body.");
             return this;
@@ -84,7 +85,7 @@ class JThisConstruction extends JExpression {
                 .thisType().constructorFor(argTypes);
 
         if (constructor == null) {
-            JAST.compilationUnit.reportSemanticError(line(),
+            JAST.compilationUnit.reportSemanticError(line(), column(),
                     "No such constructor: this"
                             + Type.argTypesAsString(argTypes));
 

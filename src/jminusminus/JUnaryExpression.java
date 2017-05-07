@@ -28,8 +28,8 @@ abstract class JUnaryExpression extends JExpression {
      *            the operand.
      */
 
-    protected JUnaryExpression(int line, String operator, JExpression arg) {
-        super(line);
+    protected JUnaryExpression(int line, int column, String operator, JExpression arg) {
+        super(line, column);
         this.operator = operator;
         this.arg = arg;
     }
@@ -71,8 +71,8 @@ class JNegateOp extends JUnaryExpression {
      *            the operand.
      */
 
-    public JNegateOp(int line, JExpression arg) {
-        super(line, "-", arg);
+    public JNegateOp(int line, int column, JExpression arg) {
+        super(line, column, "-", arg);
     }
 
     /**
@@ -86,7 +86,7 @@ class JNegateOp extends JUnaryExpression {
 
     public JExpression analyze(Context context) {
         arg = arg.analyze(context);
-        arg.type().mustMatchExpected(line(), Type.INT);
+        arg.type().mustMatchExpected(line(), column(), Type.INT);
         type = Type.INT;
         return this;
     }
@@ -124,8 +124,8 @@ class JLogicalNotOp extends JUnaryExpression {
      *            the operand.
      */
 
-    public JLogicalNotOp(int line, JExpression arg) {
-        super(line, "!", arg);
+    public JLogicalNotOp(int line, int column, JExpression arg) {
+        super(line, column, "!", arg);
     }
 
     /**
@@ -138,7 +138,7 @@ class JLogicalNotOp extends JUnaryExpression {
 
     public JExpression analyze(Context context) {
         arg = (JExpression) arg.analyze(context);
-        arg.type().mustMatchExpected(line(), Type.BOOLEAN);
+        arg.type().mustMatchExpected(line(), column(), Type.BOOLEAN);
         type = Type.BOOLEAN;
         return this;
     }
@@ -195,8 +195,8 @@ class JPostDecrementOp extends JUnaryExpression {
      *            the operand.
      */
 
-    public JPostDecrementOp(int line, JExpression arg) {
-        super(line, "post--", arg);
+    public JPostDecrementOp(int line, int column, JExpression arg) {
+        super(line, column, "post--", arg);
     }
 
     /**
@@ -210,12 +210,12 @@ class JPostDecrementOp extends JUnaryExpression {
 
     public JExpression analyze(Context context) {
         if (!(arg instanceof JLhs)) {
-            JAST.compilationUnit.reportSemanticError(line,
+            JAST.compilationUnit.reportSemanticError(line,column,
                     "Operand to expr-- must have an LValue.");
             type = Type.ANY;
         } else {
             arg = (JExpression) arg.analyze(context);
-            arg.type().mustMatchExpected(line(), Type.INT);
+            arg.type().mustMatchExpected(line(), column(), Type.INT);
             type = Type.INT;
         }
         return this;
@@ -277,8 +277,8 @@ class JPostIncrementOp extends JUnaryExpression {
      *            the operand.
      */
 
-    JPostIncrementOp(int line, JExpression arg){
-        super(line, "post++", arg);
+    JPostIncrementOp(int line, int column, JExpression arg){
+        super(line, column, "post++", arg);
     }
 
     /**
@@ -292,12 +292,12 @@ class JPostIncrementOp extends JUnaryExpression {
 
     public JExpression analyze(Context context) {
         if (!(arg instanceof JLhs)){
-            JAST.compilationUnit.reportSemanticError(line,
+            JAST.compilationUnit.reportSemanticError(line,column,
                     "Operand to expr++ must have an LValue");
             type = Type.ANY;
         } else {
             arg = (JExpression) arg.analyze(context);
-            arg.type().mustMatchExpected(line(), Type.INT);
+            arg.type().mustMatchExpected(line(), column(), Type.INT);
             type = Type.INT;
         }
         return this;
@@ -358,8 +358,8 @@ class JPreIncrementOp extends JUnaryExpression {
      *            the operand.
      */
 
-    public JPreIncrementOp(int line, JExpression arg) {
-        super(line, "++pre", arg);
+    public JPreIncrementOp(int line, int column, JExpression arg) {
+        super(line, column, "++pre", arg);
     }
 
     /**
@@ -373,12 +373,12 @@ class JPreIncrementOp extends JUnaryExpression {
 
     public JExpression analyze(Context context) {
         if (!(arg instanceof JLhs)) {
-            JAST.compilationUnit.reportSemanticError(line,
+            JAST.compilationUnit.reportSemanticError(line,column,
                     "Operand to ++expr must have an LValue.");
             type = Type.ANY;
         } else {
             arg = (JExpression) arg.analyze(context);
-            arg.type().mustMatchExpected(line(), Type.INT);
+            arg.type().mustMatchExpected(line(), column(), Type.INT);
             type = Type.INT;
         }
         return this;
@@ -439,8 +439,8 @@ class JPreDecrementOp extends JUnaryExpression {
      *            the operand.
      */
 
-    public JPreDecrementOp(int line, JExpression arg) {
-        super(line, "--pre", arg);
+    public JPreDecrementOp(int line, int column, JExpression arg) {
+        super(line, column, "--pre", arg);
     }
 
     /**
@@ -454,12 +454,12 @@ class JPreDecrementOp extends JUnaryExpression {
 
     public JExpression analyze(Context context) {
         if (!(arg instanceof JLhs)) {
-            JAST.compilationUnit.reportSemanticError(line,
+            JAST.compilationUnit.reportSemanticError(line,column,
                     "Operand to --expr must have an LValue.");
             type = Type.ANY;
         } else {
             arg = (JExpression) arg.analyze(context);
-            arg.type().mustMatchExpected(line(), Type.INT);
+            arg.type().mustMatchExpected(line(), column(), Type.INT);
             type = Type.INT;
         }
         return this;

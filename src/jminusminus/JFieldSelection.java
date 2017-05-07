@@ -34,8 +34,8 @@ class JFieldSelection extends JExpression implements JLhs {
      *            the field name.
      */
 
-    public JFieldSelection(int line, JExpression target, String fieldName) {
-        this(line, null, target, fieldName);
+    public JFieldSelection(int line, int column, JExpression target, String fieldName) {
+        this(line, column, null, target, fieldName);
     }
 
     /**
@@ -51,9 +51,9 @@ class JFieldSelection extends JExpression implements JLhs {
      *            the field name.
      */
 
-    public JFieldSelection(int line, AmbiguousName ambiguousPart,
+    public JFieldSelection(int line, int column, AmbiguousName ambiguousPart,
             JExpression target, String fieldName) {
-        super(line);
+        super(line, column);
         this.ambiguousPart = ambiguousPart;
         this.target = target;
         this.fieldName = fieldName;
@@ -79,7 +79,7 @@ class JFieldSelection extends JExpression implements JLhs {
                     target = expr;
                 else {
                     // Can't even happen syntactically
-                    JAST.compilationUnit.reportSemanticError(line(),
+                    JAST.compilationUnit.reportSemanticError(line(), column(),
                             "Badly formed suffix");
                 }
             }
@@ -94,7 +94,7 @@ class JFieldSelection extends JExpression implements JLhs {
             // Other than that, targetType has to be a
             // ReferenceType
             if (targetType.isPrimitive()) {
-                JAST.compilationUnit.reportSemanticError(line(),
+                JAST.compilationUnit.reportSemanticError(line(),column(),
                         "Target of a field selection must "
                                 + "be a defined type");
                 type = Type.ANY;
@@ -102,11 +102,11 @@ class JFieldSelection extends JExpression implements JLhs {
             }
             field = targetType.fieldFor(fieldName);
             if (field == null) {
-                JAST.compilationUnit.reportSemanticError(line(),
+                JAST.compilationUnit.reportSemanticError(line(), column(),
                         "Cannot find a field: " + fieldName);
                 type = Type.ANY;
             } else {
-                context.definingType().checkAccess(line, (Member) field);
+                context.definingType().checkAccess(line, column, (Member) field);
                 type = field.type();
 
                 // Non-static field cannot be referenced from a static context.
@@ -114,8 +114,7 @@ class JFieldSelection extends JExpression implements JLhs {
                     if (target instanceof JVariable
                             && ((JVariable) target).iDefn() instanceof TypeNameDefn) {
                         JAST.compilationUnit
-                                .reportSemanticError(
-                                        line(),
+                                .reportSemanticError(line(), column(),
                                         "Non-static field "
                                                 + fieldName
                                                 + " cannot be referenced from a static context");
@@ -139,7 +138,7 @@ class JFieldSelection extends JExpression implements JLhs {
     public JExpression analyzeLhs(Context context) {
         JExpression result = analyze(context);
         if (field.isFinal()) {
-            JAST.compilationUnit.reportSemanticError(line, "The field "
+            JAST.compilationUnit.reportSemanticError(line, column, "The field "
                     + fieldName + " in type " + target.type.toString()
                     + " is declared final.");
         }

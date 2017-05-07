@@ -299,11 +299,13 @@ class Type {
      * 
      * @param line
      *            the line near which the mismatch occurs.
+     * @param column
+     *            the column near which the mismatch occurs.
      * @param expectedTypes
      *            expected types.
      */
 
-    public void mustMatchOneOf(int line, Type... expectedTypes) {
+    public void mustMatchOneOf(int line, int column, Type... expectedTypes) {
         if (this == Type.ANY)
             return;
         for (int i = 0; i < expectedTypes.length; i++) {
@@ -311,8 +313,9 @@ class Type {
                 return;
             }
         }
-        JAST.compilationUnit.reportSemanticError(line,
-                "Type %s doesn't match any of the expected types %s", this,
+        JAST.compilationUnit.reportSemanticError(line,column,
+                "Type %s doesn't match any of the expected types %s",
+                 this,
                 Arrays.toString(expectedTypes));
     }
 
@@ -322,14 +325,17 @@ class Type {
      * 
      * @param line
      *            the line near which the mismatch occurs.
+     * @param column
+     *            the column near which the mismatch occurs.
      * @param expectedType
      *            type with which to match.
      */
 
-    public void mustMatchExpected(int line, Type expectedType) {
+    public void mustMatchExpected(int line, int column, Type expectedType) {
         if (!matchesExpected(expectedType)) {
-            JAST.compilationUnit.reportSemanticError(line,
-                    "Type %s doesn't match type %s", this, expectedType);
+            JAST.compilationUnit.reportSemanticError(line, column,
+                    "Type %s doesn't match type %s",
+                     this, expectedType);
         }
     }
 
@@ -589,13 +595,15 @@ class Type {
      * 
      * @param line
      *            the line in which the access occurs.
+     * @param column
+     *            the column in which the access occurs.
      * @param member
      *            the member being accessed.
      * @return true if access is valid; false otherwise.
      */
 
-    public boolean checkAccess(int line, Member member) {
-        if (!checkAccess(line, classRep, member.declaringType().classRep)) {
+    public boolean checkAccess(int line, int column, Member member) {
+        if (!checkAccess(line, column, classRep, member.declaringType().classRep)) {
             return false;
         }
 
@@ -616,7 +624,7 @@ class Type {
                             .isJavaAssignableFrom(this)) {
                 return true;
             } else {
-                JAST.compilationUnit.reportSemanticError(line,
+                JAST.compilationUnit.reportSemanticError(line,column,
                         "The protected member, " + member.name()
                                 + ", is not accessible.");
                 return false;
@@ -627,7 +635,7 @@ class Type {
                     descriptorFor(member.member().getDeclaringClass()))) {
                 return true;
             } else {
-                JAST.compilationUnit.reportSemanticError(line,
+                JAST.compilationUnit.reportSemanticError(line,column,
                         "The private member, " + member.name()
                                 + ", is not accessible.");
                 return false;
@@ -638,8 +646,8 @@ class Type {
         if (packageName().equals(member.declaringType().packageName())) {
             return true;
         } else {
-            JAST.compilationUnit.reportSemanticError(line, "The member, "
-                    + member.name()
+            JAST.compilationUnit.reportSemanticError(line, column,
+                    "The member, " + member.name()
                     + ", is not accessible because it's in a different "
                     + "package.");
             return false;
@@ -651,19 +659,21 @@ class Type {
      * 
      * @param line
      *            line in which the access occurs.
+     * @param column
+     *            the column in which the access occurs.
      * @param targetType
      *            the type being accessed.
      * @return true if access is valid; false otherwise.
      */
 
-    public boolean checkAccess(int line, Type targetType) {
+    public boolean checkAccess(int line, int column, Type targetType) {
         if (targetType.isPrimitive()) {
             return true;
         }
         if (targetType.isArray()) {
-            return this.checkAccess(line, targetType.componentType());
+            return this.checkAccess(line, column, targetType.componentType());
         }
-        return checkAccess(line, classRep, targetType.classRep);
+        return checkAccess(line, column, classRep, targetType.classRep);
     }
 
     /**
@@ -671,6 +681,8 @@ class Type {
      * 
      * @param line
      *            the line in which the access occurs.
+     * @param column
+     *            the column in which the access occurs.
      * @param referencingType
      *            the type attempting the access.
      * @param type
@@ -678,7 +690,7 @@ class Type {
      * @return true if access is valid; false otherwise.
      */
 
-    public static boolean checkAccess(int line, Class referencingType,
+    public static boolean checkAccess(int line, int column, Class referencingType,
             Class type) {
         java.lang.Package p1 = referencingType.getPackage();
         java.lang.Package p2 = type.getPackage();
@@ -687,7 +699,8 @@ class Type {
                         : p2.getName()))) {
             return true;
         } else {
-            JAST.compilationUnit.reportSemanticError(line, "The type, "
+            JAST.compilationUnit.reportSemanticError(line, column,
+                    "The type, "
                     + type.getCanonicalName() + ", is not accessible from "
                     + referencingType.getCanonicalName());
             return false;
@@ -745,22 +758,30 @@ class TypeName extends Type {
      */
     private int line;
 
+    /**
+     * The column in which the identifier occurs in the source file.
+     */
+    private int column;
+
     /** The identifier's name. */
     private String name;
 
     /**
-     * Construct an TypeName given its line number, and string spelling out its
-     * fully qualified name.
+     * Construct an TypeName given its line number, string spelling out its
+     * fully qualified name, and its column number.
      * 
      * @param line
      *            the line in which the identifier occurs in the source file.
      * @param name
      *            fully qualified name for the identifier.
+     * @param column
+     *            the column in which the identifier occurs in the source file.
      */
 
-    public TypeName(int line, String name) {
+    public TypeName(int line, int column, String name) {
         this.line = line;
         this.name = name;
+        this.column = column;
     }
 
     /**
@@ -771,6 +792,15 @@ class TypeName extends Type {
 
     public int line() {
         return line;
+    }
+
+    /**
+     * Return the column in which the identifier occurs in the source file.
+     *
+     * @return the column number.
+     */
+    public int column() {
+        return column;
     }
 
     /**
@@ -829,12 +859,12 @@ class TypeName extends Type {
             // Try loading a type with the give fullname
             try {
                 resolvedType = typeFor(Class.forName(name));
-                context.addType(line, resolvedType);
+                context.addType(line, column, resolvedType);
                 // context.compilationUnitContext().addEntry(line,
                 // resolvedType.toString(),
                 // new TypeNameDefn(resolvedType));
             } catch (Exception e) {
-                JAST.compilationUnit.reportSemanticError(line,
+                JAST.compilationUnit.reportSemanticError(line, column,
                         "Unable to locate a type named %s", name);
                 resolvedType = Type.ANY;
             }
@@ -842,7 +872,7 @@ class TypeName extends Type {
         if (resolvedType != Type.ANY) {
             Type referencingType = ((JTypeDecl) (context.classContext
                     .definition())).thisType();
-            Type.checkAccess(line, referencingType.classRep(), resolvedType
+            Type.checkAccess(line, column, referencingType.classRep(), resolvedType
                     .classRep());
         }
         return resolvedType;

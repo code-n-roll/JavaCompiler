@@ -36,8 +36,8 @@ class JSuperConstruction extends JExpression {
      *            the constructor's arguments.
      */
 
-    protected JSuperConstruction(int line, ArrayList<JExpression> arguments) {
-        super(line);
+    protected JSuperConstruction(int line, int column, ArrayList<JExpression> arguments) {
+        super(line, column);
         this.arguments = arguments;
     }
 
@@ -73,7 +73,7 @@ class JSuperConstruction extends JExpression {
         }
 
         if (!properUseOfConstructor) {
-            JAST.compilationUnit.reportSemanticError(line(), "super"
+            JAST.compilationUnit.reportSemanticError(line(), column(),"super"
                     + Type.argTypesAsString(argTypes)
                     + " must be first statement in the constructor's body.");
             return this;
@@ -83,14 +83,14 @@ class JSuperConstruction extends JExpression {
         Type superClass = ((JTypeDecl) context.classContext.definition())
                 .thisType().superClass();
         if (superClass == null) {
-            JAST.compilationUnit.reportSemanticError(line,
+            JAST.compilationUnit.reportSemanticError(line,column,
                     ((JTypeDecl) context.classContext.definition()).thisType()
                             + " has no super class.");
         }
         constructor = superClass.constructorFor(argTypes);
 
         if (constructor == null) {
-            JAST.compilationUnit.reportSemanticError(line(),
+            JAST.compilationUnit.reportSemanticError(line(),column(),
                     "No such constructor: super"
                             + Type.argTypesAsString(argTypes));
 

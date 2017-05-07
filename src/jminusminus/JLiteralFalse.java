@@ -17,8 +17,8 @@ class JLiteralFalse extends JExpression {
      *            line in which the literal occurs in the source file.
      */
 
-    public JLiteralFalse(int line) {
-        super(line);
+    public JLiteralFalse(int line, int column) {
+        super(line, column);
     }
 
     /**

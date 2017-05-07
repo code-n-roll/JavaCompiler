@@ -32,9 +32,9 @@ class JFieldDeclaration extends JAST implements JMember {
      *            variable declarators.
      */
 
-    public JFieldDeclaration(int line, ArrayList<String> mods,
+    public JFieldDeclaration(int line, int column, ArrayList<String> mods,
             ArrayList<JVariableDeclarator> decls) {
-        super(line);
+        super(line, column);
         this.mods = mods;
         this.decls = decls;
         initializations = new ArrayList<JStatement>();
@@ -63,7 +63,7 @@ class JFieldDeclaration extends JAST implements JMember {
     public void preAnalyze(Context context, CLEmitter partial) {
         // Fields may not be declared abstract.
         if (mods.contains("abstract")) {
-            JAST.compilationUnit.reportSemanticError(line(),
+            JAST.compilationUnit.reportSemanticError(line(), column(),
                     "Field cannot be declared abstract");
         }
 
@@ -89,10 +89,10 @@ class JFieldDeclaration extends JAST implements JMember {
             // All initializations must be turned into assignment
             // statements and analyzed
             if (decl.initializer() != null) {
-                JAssignOp assignOp = new JAssignOp(decl.line(), new JVariable(
-                        decl.line(), decl.name()), decl.initializer());
+                JAssignOp assignOp = new JAssignOp(decl.line(), decl.column(), new JVariable(
+                        decl.line(), decl.column(), decl.name()), decl.initializer());
                 assignOp.isStatementExpression = true;
-                initializations.add(new JStatementExpression(decl.line(),
+                initializations.add(new JStatementExpression(decl.line(),decl.column(),
                         assignOp).analyze(context));
             }
         }

@@ -23,8 +23,8 @@ class JLiteralChar extends JExpression {
      *            string representation of the literal.
      */
 
-    public JLiteralChar(int line, String text) {
-        super(line);
+    public JLiteralChar(int line, int column, String text) {
+        super(line, column);
         this.text = text;
     }
 

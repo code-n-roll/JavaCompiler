@@ -28,8 +28,8 @@ class JWhileStatement extends JStatement {
      *            the body.
      */
 
-    public JWhileStatement(int line, JExpression condition, JStatement body) {
-        super(line);
+    public JWhileStatement(int line, int column, JExpression condition, JStatement body) {
+        super(line, column);
         this.condition = condition;
         this.body = body;
     }
@@ -45,7 +45,7 @@ class JWhileStatement extends JStatement {
 
     public JWhileStatement analyze(Context context) {
         condition = condition.analyze(context);
-        condition.type().mustMatchExpected(line(), Type.BOOLEAN);
+        condition.type().mustMatchExpected(line(),column(), Type.BOOLEAN);
         body = (JStatement) body.analyze(context);
         return this;
     }

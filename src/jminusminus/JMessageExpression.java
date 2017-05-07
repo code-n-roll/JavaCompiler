@@ -44,9 +44,9 @@ class JMessageExpression extends JExpression {
      *            the ambiguousPart arguments.
      */
 
-    protected JMessageExpression(int line, JExpression target,
+    protected JMessageExpression(int line, int column, JExpression target,
             String messageName, ArrayList<JExpression> arguments) {
-        this(line, target, null, messageName, arguments);
+        this(line, column, target, null, messageName, arguments);
     }
 
     /**
@@ -64,10 +64,10 @@ class JMessageExpression extends JExpression {
      *            the arguments.
      */
 
-    protected JMessageExpression(int line, JExpression target,
+    protected JMessageExpression(int line, int column, JExpression target,
             AmbiguousName ambiguousPart, String messageName,
             ArrayList<JExpression> arguments) {
-        super(line);
+        super(line, column);
         this.target = target;
         this.ambiguousPart = ambiguousPart;
         this.messageName = messageName;
@@ -96,7 +96,7 @@ class JMessageExpression extends JExpression {
                     target = expr;
                 } else {
                     // Can't even happen syntactically
-                    JAST.compilationUnit.reportSemanticError(line(),
+                    JAST.compilationUnit.reportSemanticError(line(),column(),
                             "Badly formed suffix");
                 }
             }
@@ -118,15 +118,15 @@ class JMessageExpression extends JExpression {
         if (target == null) {
             // Implied this (or, implied type for statics)
             if (!context.methodContext().isStatic()) {
-                target = new JThis(line()).analyze(context);
+                target = new JThis(line(), column()).analyze(context);
             } else {
-                target = new JVariable(line(), context.definingType()
+                target = new JVariable(line(), column(), context.definingType()
                         .toString()).analyze(context);
             }
         } else {
             target = (JExpression) target.analyze(context);
             if (target.type().isPrimitive()) {
-                JAST.compilationUnit.reportSemanticError(line(),
+                JAST.compilationUnit.reportSemanticError(line(),column(),
                         "cannot invoke a message on a primitive type:"
                                 + target.type());
             }
@@ -135,12 +135,12 @@ class JMessageExpression extends JExpression {
         // Find appropriate Method for this message expression
         method = target.type().methodFor(messageName, argTypes);
         if (method == null) {
-            JAST.compilationUnit.reportSemanticError(line(),
+            JAST.compilationUnit.reportSemanticError(line(),column(),
                     "Cannot find method for: "
                             + Type.signatureFor(messageName, argTypes));
             type = Type.ANY;
         } else {
-            context.definingType().checkAccess(line, (Member) method);
+            context.definingType().checkAccess(line, column, (Member) method);
             type = method.returnType();
 
             // Non-static method cannot be referenced from a static context.
@@ -150,6 +150,7 @@ class JMessageExpression extends JExpression {
                     JAST.compilationUnit
                             .reportSemanticError(
                                     line(),
+                                    column(),
                                     "Non-static method "
                                             + Type.signatureFor(messageName,
                                                     argTypes)

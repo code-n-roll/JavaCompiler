@@ -291,8 +291,8 @@ class Scanner {
             return new TokenInfo(EOF, line, column);
         case '0':
             // Handle only simple decimal integers for now.
-            nextCh();
-            return new TokenInfo(INT_LITERAL, "0", line, column);
+//            nextCh();
+//            return new TokenInfo(INT_LITERAL, "0", line, column);
         case '1':
         case '2':
         case '3':
@@ -411,7 +411,7 @@ class Scanner {
 
     private void reportScannerError(String message, Object... args) {
         isInError = true;
-        System.err.printf("%s:%d:%d ", fileName, line, column);
+        System.err.printf("%s:%d:%d: ", fileName, line, column);
         System.err.printf(message, args);
         System.err.println();
     }

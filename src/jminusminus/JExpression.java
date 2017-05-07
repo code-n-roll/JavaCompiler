@@ -26,8 +26,8 @@ abstract class JExpression extends JStatement {
      *            line in which the expression occurs in the source file.
      */
 
-    protected JExpression(int line) {
-        super(line);
+    protected JExpression(int line, int column) {
+        super(line, column);
         isStatementExpression = false; // by default
     }
 

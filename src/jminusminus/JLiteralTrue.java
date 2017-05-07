@@ -17,8 +17,8 @@ class JLiteralTrue extends JExpression {
      *            line in which the literal occurs in the source file.
      */
 
-    public JLiteralTrue(int line) {
-        super(line);
+    public JLiteralTrue(int line, int column) {
+        super(line, column);
     }
 
     /**

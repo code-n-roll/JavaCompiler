@@ -27,8 +27,8 @@ class JFormalParameter extends JAST {
      *            parameter type.
      */
 
-    public JFormalParameter(int line, String name, Type type) {
-        super(line);
+    public JFormalParameter(int line, int column, String name, Type type) {
+        super(line, column);
         this.name = name;
         this.type = type;
     }

@@ -27,8 +27,8 @@ class JReturnStatement
      *                the returned expression.
      */
 
-    public JReturnStatement(int line, JExpression expr) {
-        super(line);
+    public JReturnStatement(int line, int column, JExpression expr) {
+        super(line, column);
         this.expr = expr;
     }
 
@@ -59,7 +59,7 @@ class JReturnStatement
         if (methodContext.methodReturnType() == Type.CONSTRUCTOR) {
             if (expr != null) {
                 // Can't return a value from a constructor
-                JAST.compilationUnit.reportSemanticError(line(),
+                JAST.compilationUnit.reportSemanticError(line(), column(),
                     "cannot return a value from a constructor");
             }
         } else {
@@ -69,7 +69,7 @@ class JReturnStatement
             if (expr != null) {
                 if (returnType == Type.VOID) {
                     // Can't return a value from void method
-                    JAST.compilationUnit.reportSemanticError(line(),
+                    JAST.compilationUnit.reportSemanticError(line(), column(),
                         "cannot return a value from a void method");
                 } else {
                     // There's a (non-void) return expression.
@@ -77,12 +77,12 @@ class JReturnStatement
                     // type must match the return type of the
                     // method
                     expr = expr.analyze(context);
-                    expr.type().mustMatchExpected(line(), returnType);
+                    expr.type().mustMatchExpected(line(), column(), returnType);
                 }
             } else {
                 // The method better have void as return type
                 if (returnType != Type.VOID) {
-                    JAST.compilationUnit.reportSemanticError(line(),
+                    JAST.compilationUnit.reportSemanticError(line(), column(),
                         "missing return value");
                 }
             }
@@ -123,13 +123,13 @@ class JReturnStatement
 
     public void writeToStdOut(PrettyPrinter p) {
         if (expr != null) {
-            p.printf("<JReturnStatement line=\"%d\">\n", line());
+            p.printf("<JReturnStatement line=\"%d\">\n", line(), column());
             p.indentRight();
             expr.writeToStdOut(p);
             p.indentLeft();
             p.printf("</JReturnStatement>\n");
         } else {
-            p.printf("<JReturnStatement line=\"%d\"/>\n", line());
+            p.printf("<JReturnStatement line=\"%d\"/>\n", line(), column());
         }
     }
 }

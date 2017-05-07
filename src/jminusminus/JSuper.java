@@ -18,8 +18,8 @@ class JSuper extends JExpression {
      *            line in which the expression occurs in the source file.
      */
 
-    public JSuper(int line) {
-        super(line);
+    public JSuper(int line, int column) {
+        super(line, column);
     }
 
     /**
@@ -37,7 +37,7 @@ class JSuper extends JExpression {
         if (type.isReference() && type.superClass() != null) {
             type = type.superClass();
         } else {
-            JAST.compilationUnit.reportSemanticError(line(),
+            JAST.compilationUnit.reportSemanticError(line(),column(),
                     "No super class for type " + type.toString());
         }
         return this;

@@ -21,8 +21,8 @@ class JLiteralString extends JExpression {
      *            representation of the literal.
      */
 
-    public JLiteralString(int line, String text) {
-        super(line);
+    public JLiteralString(int line, int column, String text) {
+        super(line, column);
         this.text = text;
     }
 

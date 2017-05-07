@@ -23,8 +23,8 @@ class JLiteralInt extends JExpression {
      *            string representation of the literal.
      */
 
-    public JLiteralInt(int line, String text) {
-        super(line);
+    public JLiteralInt(int line, int column, String text) {
+        super(line, column);
         this.text = text;
     }
 

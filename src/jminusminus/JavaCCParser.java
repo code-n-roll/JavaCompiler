@@ -28,7 +28,7 @@ class JavaCCParser implements JavaCCParserConstants {
         int lastDotIndex = qualifiedName.lastIndexOf( '.' );
         return lastDotIndex == -1
             ? null // It was a simple name
-            : new AmbiguousName( name.line(),
+            : new AmbiguousName( name.line(),name.column(),
                 qualifiedName.substring( 0, lastDotIndex ) );
     }
 
@@ -41,7 +41,7 @@ class JavaCCParser implements JavaCCParserConstants {
 
     private void reportParserError( String message, Object... args ) {
         errorHasOccurred = true;
-        System.err.printf( "%s:%d: ", fileName, token.beginLine );
+        System.err.printf( "%s:%d:%d: ", fileName, token.beginLine, token.beginColumn );
         System.err.printf( message, args );
         System.err.println();
     }
@@ -119,6 +119,7 @@ class JavaCCParser implements JavaCCParserConstants {
 
   final public JCompilationUnit compilationUnit() throws ParseException {
     int line = 0;
+    int column = 0;
     TypeName packageName = null; // Default
     TypeName anImport = null;
     ArrayList<TypeName> imports =
@@ -130,6 +131,7 @@ class JavaCCParser implements JavaCCParserConstants {
       case PACKAGE:
         jj_consume_token(PACKAGE);
                         line = token.beginLine;
+                        column = token.beginColumn;
         packageName = qualifiedIdentifier();
         jj_consume_token(SEMI);
         break;
@@ -149,6 +151,7 @@ class JavaCCParser implements JavaCCParserConstants {
         }
         jj_consume_token(IMPORT);
                        line = line == 0 ? token.beginLine : line;
+                       column = column == 0 ? token.beginColumn : column;
         anImport = qualifiedIdentifier();
               imports.add( anImport );
         jj_consume_token(SEMI);
@@ -170,24 +173,28 @@ class JavaCCParser implements JavaCCParserConstants {
         }
         aTypeDeclaration = typeDeclaration();
                 line = line == 0 ? aTypeDeclaration.line() : line;
+                column = column == 0 ? aTypeDeclaration.column() : column;
                 typeDeclarations.add( aTypeDeclaration );
       }
       jj_consume_token(0);
                 line = line == 0 ? token.beginLine : line;
+                column = column == 0 ? token.beginColumn : column;
     } catch (ParseException e) {
         recoverFromError( new int[] { SEMI, EOF }, e );
     }
-        {if (true) return new JCompilationUnit( fileName, line,
+        {if (true) return new JCompilationUnit( fileName, line, column,
             packageName, imports, typeDeclarations );}
     throw new Error("Missing return statement in function");
   }
 
   final private TypeName qualifiedIdentifier() throws ParseException {
     int line = 0;
+    int column = 0;
     String qualifiedIdentifier = "";
     try {
       jj_consume_token(IDENTIFIER);
             line = token.beginLine;
+            column = token.beginColumn;
             qualifiedIdentifier = token.image;
       label_3:
       while (true) {
@@ -207,7 +214,7 @@ class JavaCCParser implements JavaCCParserConstants {
         recoverFromError( new int[] { SEMI, EOF }, e );
     }
       {if (true) return
-         new TypeName( line, qualifiedIdentifier );}
+         new TypeName( line, column, qualifiedIdentifier );}
     throw new Error("Missing return statement in function");
   }
 
@@ -311,12 +318,14 @@ class JavaCCParser implements JavaCCParserConstants {
 
   final private JClassDeclaration classDeclaration(ArrayList<String> mods) throws ParseException {
     int line = 0;
+    int column = 0;
     String name = "";
     Type superClass = Type.OBJECT;
     ArrayList<JMember> classBody = null;
     try {
       jj_consume_token(CLASS);
                   line = token.beginLine;
+                  column = token.beginColumn;
       jj_consume_token(IDENTIFIER);
                        name = token.image;
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -332,7 +341,7 @@ class JavaCCParser implements JavaCCParserConstants {
     } catch (ParseException e) {
         recoverFromError( new int[] { SEMI, EOF }, e );
     }
-        {if (true) return new JClassDeclaration( line, mods,
+        {if (true) return new JClassDeclaration( line, column, mods,
             name, superClass, classBody );}
     throw new Error("Missing return statement in function");
   }
@@ -377,6 +386,7 @@ class JavaCCParser implements JavaCCParserConstants {
 
   final private JMember memberDecl(ArrayList<String>  mods) throws ParseException {
     int line = 0;
+    int column = 0;
     Type type = null;
     String name = "";
     ArrayList<JFormalParameter> params = null;
@@ -387,11 +397,12 @@ class JavaCCParser implements JavaCCParserConstants {
       if (jj_2_1(2147483647)) {
         jj_consume_token(IDENTIFIER);
                 line = token.beginLine;
+                column = token.beginColumn;
                 name = token.image;
         params = formalParameters();
         body = block();
                 memberDecl =
-                new JConstructorDeclaration( line, mods,
+                new JConstructorDeclaration( line, column, mods,
                                              name, params, body );
       } else if (jj_2_2(2147483647)) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -412,6 +423,7 @@ class JavaCCParser implements JavaCCParserConstants {
           throw new ParseException();
         }
               line = token.beginLine;
+              column = token.beginColumn;
         jj_consume_token(IDENTIFIER);
                            name = token.image;
         params = formalParameters();
@@ -428,7 +440,7 @@ class JavaCCParser implements JavaCCParserConstants {
           throw new ParseException();
         }
                 memberDecl =
-                   new JMethodDeclaration( line, mods, name,
+                   new JMethodDeclaration( line,column, mods, name,
                                            type, params, body );
       } else {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -439,9 +451,10 @@ class JavaCCParser implements JavaCCParserConstants {
         case IDENTIFIER:
           type = type();
                             line = token.beginLine;
+                            column = token.beginColumn;
           variableDeclarators = variableDeclarators(type);
           jj_consume_token(SEMI);
-                memberDecl = new JFieldDeclaration( line, mods,
+                memberDecl = new JFieldDeclaration( line, column, mods,
                     variableDeclarators );
           break;
         default:
@@ -459,11 +472,13 @@ class JavaCCParser implements JavaCCParserConstants {
 
   final private JBlock block() throws ParseException {
     int line = 0;
+    int column = 0;
     JStatement aStatement = null;
     ArrayList<JStatement> statements = new ArrayList<JStatement>();
     try {
       jj_consume_token(LCURLY);
                    line = token.beginLine;
+                   column = token.beginColumn;
       label_6:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -504,7 +519,7 @@ class JavaCCParser implements JavaCCParserConstants {
     } catch (ParseException e) {
         recoverFromError( new int[] { SEMI, EOF }, e );
     }
-      {if (true) return new JBlock( line, statements );}
+      {if (true) return new JBlock( line, column, statements );}
     throw new Error("Missing return statement in function");
   }
 
@@ -552,6 +567,7 @@ class JavaCCParser implements JavaCCParserConstants {
 
   final private JStatement statement() throws ParseException {
     int line = 0;
+    int column = 0;
     JStatement statement = null;
     JExpression test = null;
     JStatement consequent = null;
@@ -566,6 +582,7 @@ class JavaCCParser implements JavaCCParserConstants {
       case IF:
         jj_consume_token(IF);
                line = token.beginLine;
+               column = token.beginColumn;
         test = parExpression();
         consequent = statement();
         if (jj_2_4(2147483647)) {
@@ -575,18 +592,20 @@ class JavaCCParser implements JavaCCParserConstants {
           ;
         }
           statement =
-            new JIfStatement( line, test, consequent, alternate );
+            new JIfStatement( line, column, test, consequent, alternate );
         break;
       case WHILE:
         jj_consume_token(WHILE);
                   line = token.beginLine;
+                  column = token.beginColumn;
         test = parExpression();
         body = statement();
-          statement = new JWhileStatement( line, test, body );
+          statement = new JWhileStatement( line, column, test, body );
         break;
       case RETURN:
         jj_consume_token(RETURN);
                    line = token.beginLine;
+                   column = token.beginColumn;
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
         case FALSE:
         case NEW:
@@ -610,11 +629,11 @@ class JavaCCParser implements JavaCCParserConstants {
           ;
         }
         jj_consume_token(SEMI);
-          statement = new JReturnStatement( line, expr );
+          statement = new JReturnStatement( line, column, expr );
         break;
       case SEMI:
         jj_consume_token(SEMI);
-          statement = new JEmptyStatement( line );
+          statement = new JEmptyStatement( line, column );
         break;
       case FALSE:
       case NEW:
@@ -690,17 +709,19 @@ class JavaCCParser implements JavaCCParserConstants {
 
   final private JFormalParameter formalParameter() throws ParseException {
     int line = 0;
-    Type type = null;
+      int column = 0;
+      Type type = null;
     String name = "";
     try {
       type = type();
                         line = token.beginLine;
+                        column = token.beginColumn;
       jj_consume_token(IDENTIFIER);
                        name = token.image;
     } catch (ParseException e) {
         recoverFromError( new int[] { SEMI, EOF }, e );
     }
-      {if (true) return new JFormalParameter( line, name, type );}
+      {if (true) return new JFormalParameter( line, column, name, type );}
     throw new Error("Missing return statement in function");
   }
 
@@ -719,18 +740,20 @@ class JavaCCParser implements JavaCCParserConstants {
 
   final private JVariableDeclaration localVariableDeclarationStatement() throws ParseException {
     int line = 0;
+    int column = 0;
     Type type = null;
     ArrayList<JVariableDeclarator> vdecls = null;
     ArrayList<String> mods = new ArrayList<String>();
     try {
       type = type();
                         line = token.beginLine;
+                        column = token.beginColumn;
       vdecls = variableDeclarators(type);
       jj_consume_token(SEMI);
     } catch (ParseException e) {
         recoverFromError( new int[] { SEMI, EOF }, e );
     }
-      {if (true) return new JVariableDeclaration( line, mods, vdecls );}
+      {if (true) return new JVariableDeclaration( line, column, mods, vdecls );}
     throw new Error("Missing return statement in function");
   }
 
@@ -764,11 +787,13 @@ class JavaCCParser implements JavaCCParserConstants {
 
   final private JVariableDeclarator variableDeclarator(Type type) throws ParseException {
     int line = 0;
-    JExpression initial = null;
+      int column = 0;
+      JExpression initial = null;
     String name = "";
     try {
       jj_consume_token(IDENTIFIER);
-                       line = token.beginLine; name = token.image;
+                       line = token.beginLine;
+                       column = token.beginColumn;name = token.image;
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case ASSIGN:
         jj_consume_token(ASSIGN);
@@ -781,7 +806,7 @@ class JavaCCParser implements JavaCCParserConstants {
     } catch (ParseException e) {
         recoverFromError( new int[] { SEMI, EOF }, e );
     }
-      {if (true) return new JVariableDeclarator( line, name, type, initial );}
+      {if (true) return new JVariableDeclarator( line, column, name, type, initial );}
     throw new Error("Missing return statement in function");
   }
 
@@ -823,11 +848,13 @@ class JavaCCParser implements JavaCCParserConstants {
 
   final private JArrayInitializer arrayInitializer(Type expected) throws ParseException {
     int line = 0;
-    ArrayList<JExpression> initials = new ArrayList<JExpression>();
+      int column = 0;
+      ArrayList<JExpression> initials = new ArrayList<JExpression>();
     JExpression anInitializer = null;
     try {
       jj_consume_token(LCURLY);
                    line = token.beginLine;
+                   column = token.beginColumn;
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case FALSE:
       case NEW:
@@ -870,7 +897,7 @@ class JavaCCParser implements JavaCCParserConstants {
     } catch (ParseException e) {
         recoverFromError( new int[] { SEMI, EOF }, e );
     }
-      {if (true) return new JArrayInitializer( line, expected, initials );}
+      {if (true) return new JArrayInitializer( line, column, expected, initials );}
     throw new Error("Missing return statement in function");
   }
 
@@ -1039,10 +1066,12 @@ class JavaCCParser implements JavaCCParserConstants {
 
   final private JStatement statementExpression() throws ParseException {
     int line = 0;
+    int column = 0;
     JExpression expr = null;
     try {
       expr = expression();
             line = expr.line();
+            column = expr.column();
             if ( expr instanceof JAssignment
               || expr instanceof JPreIncrementOp
               || expr instanceof JPreDecrementOp
@@ -1063,7 +1092,7 @@ class JavaCCParser implements JavaCCParserConstants {
     } catch (ParseException e) {
         recoverFromError( new int[] { SEMI, EOF }, e );
     }
-      {if (true) return new JStatementExpression( line, expr );}
+      {if (true) return new JStatementExpression( line,column, expr );}
     throw new Error("Missing return statement in function");
   }
 
@@ -1080,10 +1109,12 @@ class JavaCCParser implements JavaCCParserConstants {
 
   final private JExpression assignmentExpression() throws ParseException {
     int line = 0;
+    int column = 0;
     JExpression lhs = null, rhs = null;
     try {
       lhs = conditionalAndExpression();
-                                           line = lhs.line();
+        line = lhs.line();
+        column = lhs.column();
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case ASSIGN:
       case MOD_ASSIGN:
@@ -1091,12 +1122,12 @@ class JavaCCParser implements JavaCCParserConstants {
               case ASSIGN:
                   jj_consume_token(ASSIGN);
                   rhs = assignmentExpression();
-                  lhs = new JAssignOp( line, lhs, rhs);
+                  lhs = new JAssignOp( line, column, lhs, rhs);
                   break;
               case MOD_ASSIGN:
                   jj_consume_token(MOD_ASSIGN);
                   rhs = assignmentExpression();
-                  lhs = new JModAssignOp( line, lhs, rhs);
+                  lhs = new JModAssignOp( line, column, lhs, rhs);
                   break;
               default:
                   jj_la1[58] = jj_gen;
@@ -1109,12 +1140,12 @@ class JavaCCParser implements JavaCCParserConstants {
               case ASSIGN:
                   jj_consume_token(ASSIGN);
                   rhs = assignmentExpression();
-                  lhs = new JAssignOp( line, lhs, rhs);
+                  lhs = new JAssignOp( line, column, lhs, rhs);
                   break;
               case DIV_ASSIGN:
                   jj_consume_token(DIV_ASSIGN);
                   rhs = assignmentExpression();
-                  lhs = new JDivAssignOp( line, lhs, rhs);
+                  lhs = new JDivAssignOp( line, column, lhs, rhs);
                   break;
               default:
                   jj_la1[57] = jj_gen;
@@ -1127,12 +1158,12 @@ class JavaCCParser implements JavaCCParserConstants {
               case ASSIGN:
                   jj_consume_token(ASSIGN);
                   rhs = assignmentExpression();
-                  lhs = new JAssignOp( line, lhs, rhs);
+                  lhs = new JAssignOp( line, column, lhs, rhs);
                   break;
               case STAR_ASSIGN:
                   jj_consume_token(STAR_ASSIGN);
                   rhs = assignmentExpression();
-                  lhs = new JStarAssignOp( line, lhs, rhs);
+                  lhs = new JStarAssignOp( line, column, lhs, rhs);
                   break;
               default:
                   jj_la1[56] = jj_gen;
@@ -1146,12 +1177,12 @@ class JavaCCParser implements JavaCCParserConstants {
               case ASSIGN:
                   jj_consume_token(ASSIGN);
                   rhs = assignmentExpression();
-                  lhs = new JAssignOp( line, lhs, rhs);
+                  lhs = new JAssignOp( line, column, lhs, rhs);
                   break;
               case MINUS_ASSIGN:
                   jj_consume_token(MINUS_ASSIGN);
                   rhs = assignmentExpression();
-                  lhs = new JMinusAssignOp( line, lhs, rhs);
+                  lhs = new JMinusAssignOp( line, column, lhs, rhs);
                   break;
               default:
                   jj_la1[55] = jj_gen;
@@ -1165,12 +1196,12 @@ class JavaCCParser implements JavaCCParserConstants {
         case ASSIGN:
           jj_consume_token(ASSIGN);
           rhs = assignmentExpression();
-              lhs = new JAssignOp( line, lhs, rhs );
+              lhs = new JAssignOp( line, column, lhs, rhs );
           break;
         case PLUS_ASSIGN:
           jj_consume_token(PLUS_ASSIGN);
           rhs = assignmentExpression();
-              lhs = new JPlusAssignOp( line, lhs, rhs );
+              lhs = new JPlusAssignOp( line, column, lhs, rhs );
           break;
         default:
           jj_la1[29] = jj_gen;
@@ -1191,10 +1222,12 @@ class JavaCCParser implements JavaCCParserConstants {
 
   final private JExpression conditionalAndExpression() throws ParseException {
     int line = 0;
+    int column = 0;
     JExpression lhs = null, rhs = null;
     try {
       lhs = equalityExpression();
-                                     line = lhs.line();
+        line = lhs.line();
+        column = lhs.column();
       label_13:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -1207,7 +1240,7 @@ class JavaCCParser implements JavaCCParserConstants {
         }
         jj_consume_token(LAND);
         rhs = equalityExpression();
-              lhs = new JLogicalAndOp( line, lhs, rhs );
+              lhs = new JLogicalAndOp( line, column, lhs, rhs );
       }
     } catch (ParseException e) {
         recoverFromError( new int[] { SEMI, EOF }, e );
@@ -1246,23 +1279,24 @@ class JavaCCParser implements JavaCCParserConstants {
 
   final private JExpression equalityExpression() throws ParseException {
     int line = 0;
-    JExpression lhs = null, rhs = null;
+      int column = 0;
+      JExpression lhs = null, rhs = null;
     try {
       lhs = relationalExpression();
       line = lhs.line();
-
+      column = lhs.column();
       label_14:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
         case EQUAL:
             jj_consume_token(EQUAL);
             rhs = relationalExpression();
-            lhs = new JEqualOp( line, lhs, rhs );
+            lhs = new JEqualOp( line, column, lhs, rhs );
             break;
         case NOT_EQUAL:
             jj_consume_token(NOT_EQUAL);
             rhs = relationalExpression();
-            lhs = new JNotEqualOp( line, lhs, rhs);
+            lhs = new JNotEqualOp( line, column, lhs, rhs);
             break;
         default:
             jj_la1[32] = jj_gen;
@@ -1278,11 +1312,13 @@ class JavaCCParser implements JavaCCParserConstants {
 
   final private JExpression relationalExpression() throws ParseException {
     int line = 0;
+    int column = 0;
     JExpression lhs = null, rhs = null;
     Type type = null;
     try {
       lhs = additiveExpression();
       line = lhs.line();
+      column = lhs.column();
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case INSTANCEOF:
       case LT:
@@ -1291,17 +1327,17 @@ class JavaCCParser implements JavaCCParserConstants {
               case LT:
                   jj_consume_token(LT);
                   rhs = additiveExpression();
-                  lhs = new JLessThanOp( line, lhs, rhs );
+                  lhs = new JLessThanOp( line, column, lhs, rhs );
                   break;
               case GE:
                   jj_consume_token(GE);
                   rhs = additiveExpression();
-                  lhs = new JGreaterEqualOp( line, lhs, rhs );
+                  lhs = new JGreaterEqualOp( line, column, lhs, rhs );
                   break;
               case INSTANCEOF:
                   jj_consume_token(INSTANCEOF);
                   type = referenceType();
-                  lhs = new JInstanceOfOp( line, lhs, type );
+                  lhs = new JInstanceOfOp( line, column, lhs, type );
                   break;
               default:
                   jj_la1[59] = jj_gen;
@@ -1315,17 +1351,17 @@ class JavaCCParser implements JavaCCParserConstants {
         case GT:
           jj_consume_token(GT);
           rhs = additiveExpression();
-              lhs = new JGreaterThanOp( line, lhs, rhs );
+              lhs = new JGreaterThanOp( line, column, lhs, rhs );
           break;
         case LE:
           jj_consume_token(LE);
           rhs = additiveExpression();
-              lhs = new JLessEqualOp( line, lhs, rhs );
+              lhs = new JLessEqualOp( line, column, lhs, rhs );
           break;
         case INSTANCEOF:
           jj_consume_token(INSTANCEOF);
           type = referenceType();
-              lhs = new JInstanceOfOp( line, lhs, type );
+              lhs = new JInstanceOfOp( line, column, lhs, type );
           break;
         default:
           jj_la1[33] = jj_gen;
@@ -1346,10 +1382,12 @@ class JavaCCParser implements JavaCCParserConstants {
 
   final private JExpression additiveExpression() throws ParseException {
     int line = 0;
-    JExpression lhs = null, rhs = null;
+      int column = 0;
+      JExpression lhs = null, rhs = null;
     try {
       lhs = multiplicativeExpression();
                                            line = lhs.line();
+                                           column = lhs.column();
       label_15:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -1365,12 +1403,12 @@ class JavaCCParser implements JavaCCParserConstants {
         case PLUS:
           jj_consume_token(PLUS);
           rhs = multiplicativeExpression();
-              lhs = new JPlusOp( line, lhs, rhs );
+              lhs = new JPlusOp( line, column, lhs, rhs );
           break;
         case MINUS:
           jj_consume_token(MINUS);
           rhs = multiplicativeExpression();
-              lhs = new JSubtractOp( line, lhs, rhs );
+              lhs = new JSubtractOp( line, column, lhs, rhs );
           break;
         default:
           jj_la1[36] = jj_gen;
@@ -1387,10 +1425,12 @@ class JavaCCParser implements JavaCCParserConstants {
 
   final private JExpression multiplicativeExpression() throws ParseException {
     int line = 0;
+    int column = 0;
     JExpression lhs = null, rhs = null;
     try {
       lhs = unaryExpression();
-                                  line = lhs.line();
+        line = lhs.line();
+        column = lhs.column();
       label_16:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -1403,7 +1443,7 @@ class JavaCCParser implements JavaCCParserConstants {
         }
         jj_consume_token(STAR);
         rhs = unaryExpression();
-              lhs = new JMultiplyOp( line, lhs, rhs );
+              lhs = new JMultiplyOp( line, column, lhs, rhs );
       }
     } catch (ParseException e) {
         recoverFromError( new int[] { SEMI, EOF }, e );
@@ -1414,26 +1454,30 @@ class JavaCCParser implements JavaCCParserConstants {
 
   final private JExpression unaryExpression() throws ParseException {
     int line = 0;
+    int column = 0;
     JExpression expr = null, unaryExpr = null;
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
           case INC:
               jj_consume_token(INC);
               line = token.beginLine;
+              column = token.beginColumn;
               unaryExpr = unaryExpression();
-              expr = new JPreIncrementOp( line, unaryExpr );
+              expr = new JPreIncrementOp( line, column, unaryExpr );
               break;
           case DEC:
               jj_consume_token(DEC);
               line = token.beginLine;
+              column = token.beginColumn;
               unaryExpr = unaryExpression();
-              expr = new JPreDecrementOp( line, unaryExpr );
+              expr = new JPreDecrementOp( line, column, unaryExpr );
               break;
           case MINUS:
             jj_consume_token(MINUS);
                       line = token.beginLine;
+                      column = token.beginColumn;
             unaryExpr = unaryExpression();
-              expr = new JNegateOp( line, unaryExpr );
+              expr = new JNegateOp( line, column, unaryExpr );
             break;
           case FALSE:
           case NEW:
@@ -1464,32 +1508,37 @@ class JavaCCParser implements JavaCCParserConstants {
 
   final private JExpression simpleUnaryExpression() throws ParseException {
     int line = 0;
-    Type type = null;
+      int column = 0;
+
+      Type type = null;
     JExpression expr = null, unaryExpr = null, simpleUnaryExpr = null;
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case LNOT:
         jj_consume_token(LNOT);
                  line = token.beginLine;
+                 column = token.beginColumn;
         unaryExpr = unaryExpression();
-          expr = new JLogicalNotOp( line, unaryExpr );
+          expr = new JLogicalNotOp( line, column, unaryExpr );
         break;
       default:
         jj_la1[39] = jj_gen;
         if (jj_2_6(2147483647)) {
           jj_consume_token(LPAREN);
                    line = token.beginLine;
+                   column = token.beginColumn;
           type = basicType();
           jj_consume_token(RPAREN);
           unaryExpr = unaryExpression();
-          expr = new JCastOp( line, type, unaryExpr );
+          expr = new JCastOp( line, column, type, unaryExpr );
         } else if (jj_2_7(2147483647)) {
           jj_consume_token(LPAREN);
                    line = token.beginLine;
+                   column = token.beginColumn;
           type = referenceType();
           jj_consume_token(RPAREN);
           simpleUnaryExpr = simpleUnaryExpression();
-          expr = new JCastOp( line, type, simpleUnaryExpr );
+          expr = new JCastOp( line, column, type, simpleUnaryExpr );
         } else {
           switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
           case FALSE:
@@ -1522,10 +1571,12 @@ class JavaCCParser implements JavaCCParserConstants {
 
   final private JExpression postfixExpression() throws ParseException {
     int line = 0;
+    int column = 0;
     JExpression primaryExpr = null;
     try {
       primaryExpr = primary();
       line = primaryExpr.line();
+      column = primaryExpr.column();
 
       label_17:
       while (true) {
@@ -1546,12 +1597,12 @@ class JavaCCParser implements JavaCCParserConstants {
         case DEC:
           jj_consume_token(DEC);
           primaryExpr =
-                  new JPostDecrementOp( line, primaryExpr );
+                  new JPostDecrementOp( line, column, primaryExpr );
           break;
         case INC:
           jj_consume_token(INC);
           primaryExpr =
-                  new JPostIncrementOp( line, primaryExpr );
+                  new JPostIncrementOp( line, column, primaryExpr );
           break;
         default:
           jj_la1[42] = jj_gen;
@@ -1568,6 +1619,8 @@ class JavaCCParser implements JavaCCParserConstants {
 
   final private JExpression selector(JExpression target) throws ParseException {
     int line = 0;
+    int column = 0;
+
     ArrayList<JExpression> args = null;
     TypeName id = null;
     JExpression expr = null;
@@ -1576,14 +1629,15 @@ class JavaCCParser implements JavaCCParserConstants {
       case DOT:
         jj_consume_token(DOT);
                 line = token.beginLine;
+                column = token.beginColumn;
         id = qualifiedIdentifier();
           expr =
-              new JFieldSelection( line, ambiguousPart( id ),
+              new JFieldSelection( line, column, ambiguousPart( id ),
                                    target, id.simpleName() );
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
         case LPAREN:
           args = arguments();
-              expr = new JMessageExpression( line, target,
+              expr = new JMessageExpression( line, column, target,
                   ambiguousPart( id ), id.simpleName(), args );
           break;
         default:
@@ -1594,7 +1648,8 @@ class JavaCCParser implements JavaCCParserConstants {
       case LBRACK:
         jj_consume_token(LBRACK);
                    line = token.beginLine;
-          expr = new JArrayExpression( line, target, expression() );
+                   column = token.beginColumn;
+          expr = new JArrayExpression( line, column, target, expression() );
         jj_consume_token(RBRACK);
         break;
       default:
@@ -1611,6 +1666,7 @@ class JavaCCParser implements JavaCCParserConstants {
 
   final private JExpression primary() throws ParseException {
     int line = 0;
+    int column = 0;
     JExpression expr = null;
     JExpression newTarget = null;
     ArrayList<JExpression> args = null;
@@ -1622,11 +1678,12 @@ class JavaCCParser implements JavaCCParserConstants {
         break;
       case THIS:
         jj_consume_token(THIS);
-                 line = token.beginLine; expr = new JThis( line );
+                 line = token.beginLine;
+                 column = token.beginColumn;expr = new JThis( line, column );
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
         case LPAREN:
           args = arguments();
-              expr = new JThisConstruction( line, args );
+              expr = new JThisConstruction( line, column, args );
           break;
         default:
           jj_la1[45] = jj_gen;
@@ -1636,21 +1693,22 @@ class JavaCCParser implements JavaCCParserConstants {
       case SUPER:
         jj_consume_token(SUPER);
                   line = token.beginLine;
+                  column = token.beginColumn;
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
         case LPAREN:
           args = arguments();
-              expr = new JSuperConstruction( line, args );
+              expr = new JSuperConstruction( line, column, args );
           break;
         case DOT:
           jj_consume_token(DOT);
           jj_consume_token(IDENTIFIER);
-                newTarget = new JSuper( line );
-                expr = new JFieldSelection( line, newTarget,
+                newTarget = new JSuper( line, column );
+                expr = new JFieldSelection( line, column, newTarget,
                                             token.image );
           switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
           case LPAREN:
             args = arguments();
-                  expr = new JMessageExpression( line, newTarget,
+                  expr = new JMessageExpression( line, column, newTarget,
                       null, token.image, args );
             break;
           default:
@@ -1683,17 +1741,18 @@ class JavaCCParser implements JavaCCParserConstants {
                 // Semantic analysis will sort it out.
                 id = qualifiedIdentifier();
             line = id.line();
+            column = id.column();
             if ( ambiguousPart( id ) == null ) {
-                expr = new JVariable( line, id.simpleName() );
+                expr = new JVariable( line, column, id.simpleName() );
             }
             else {
-                expr = new JFieldSelection( line, ambiguousPart( id ),
+                expr = new JFieldSelection( line, column, ambiguousPart( id ),
                                             null, id.simpleName() );
             }
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
         case LPAREN:
           args = arguments();
-              expr = new JMessageExpression( line, null,
+              expr = new JMessageExpression( line, column, null,
                   ambiguousPart( id ), id.simpleName(), args );
           break;
         default:
@@ -1715,6 +1774,8 @@ class JavaCCParser implements JavaCCParserConstants {
 
   final private JExpression creator() throws ParseException {
     int line = 0;
+    int column = 0;
+
     Type type = null;
     ArrayList<JExpression> args = null;
     ArrayList<JExpression> dims = null;
@@ -1737,11 +1798,13 @@ class JavaCCParser implements JavaCCParserConstants {
         jj_consume_token(-1);
         throw new ParseException();
       }
-          line = token.beginLine; expected = type;
+          line = token.beginLine;
+      column = token.beginColumn;
+      expected = type;
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case LPAREN:
         args = arguments();
-              expr = new JNewOp( line, type, args );
+              expr = new JNewOp( line, column, type, args );
         break;
       default:
         jj_la1[52] = jj_gen;
@@ -1782,7 +1845,7 @@ class JavaCCParser implements JavaCCParserConstants {
         }
       }
     } catch (ParseException e) {
-        expr = new JWildExpression( token.beginLine );
+        expr = new JWildExpression( token.beginLine, token.beginColumn );
         recoverFromError( new int[] { SEMI, EOF }, e );
     }
       {if (true) return expr;}
@@ -1791,11 +1854,14 @@ class JavaCCParser implements JavaCCParserConstants {
 
   final private JNewArrayOp newArrayDeclarator(Type type) throws ParseException {
     int line = 0;
+    int column = 0;
+
     ArrayList<JExpression> dimensions = new ArrayList<JExpression>();
     JExpression expr = null;
     try {
       jj_consume_token(LBRACK);
                    line = token.beginLine;
+                   column = token.beginColumn;
       expr = expression();
           dimensions.add( expr ); type = new ArrayTypeName( type );
       jj_consume_token(RBRACK);
@@ -1825,7 +1891,7 @@ class JavaCCParser implements JavaCCParserConstants {
     } catch (ParseException e) {
         recoverFromError( new int[] { SEMI, EOF }, e );
     }
-      {if (true) return new JNewArrayOp( line, type, dimensions );}
+      {if (true) return new JNewArrayOp( line, column, type, dimensions );}
     throw new Error("Missing return statement in function");
   }
 
@@ -1835,32 +1901,32 @@ class JavaCCParser implements JavaCCParserConstants {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case INT_LITERAL:
         jj_consume_token(INT_LITERAL);
-          expr = new JLiteralInt( token.beginLine, token.image );
+          expr = new JLiteralInt( token.beginLine, token.beginColumn, token.image );
         break;
       case DOUBLE_LITERAL:
         jj_consume_token(DOUBLE_LITERAL);
-          expr = new JLiteralDouble( token.beginLine, token.image );
+          expr = new JLiteralDouble( token.beginLine, token.beginColumn, token.image );
         break;
       case CHAR_LITERAL:
         jj_consume_token(CHAR_LITERAL);
-          expr = new JLiteralChar( token.beginLine, token.image );
+          expr = new JLiteralChar( token.beginLine, token.beginColumn, token.image );
         break;
       case STRING_LITERAL:
         jj_consume_token(STRING_LITERAL);
           expr =
-              new JLiteralString( token.beginLine, token.image );
+              new JLiteralString( token.beginLine, token.beginColumn, token.image );
         break;
       case TRUE:
         jj_consume_token(TRUE);
-          expr = new JLiteralTrue( token.beginLine );
+          expr = new JLiteralTrue( token.beginLine, token.beginColumn );
         break;
       case FALSE:
         jj_consume_token(FALSE);
-          expr = new JLiteralFalse( token.beginLine );
+          expr = new JLiteralFalse( token.beginLine, token.beginColumn );
         break;
       case NULL:
         jj_consume_token(NULL);
-          expr = new JLiteralNull( token.beginLine );
+          expr = new JLiteralNull( token.beginLine, token.beginColumn );
         break;
       default:
         jj_la1[54] = jj_gen;
@@ -1868,7 +1934,7 @@ class JavaCCParser implements JavaCCParserConstants {
         throw new ParseException();
       }
     } catch (ParseException e) {
-        expr = new JWildExpression( token.beginLine );
+        expr = new JWildExpression( token.beginLine, token.beginColumn );
         recoverFromError( new int[] { SEMI, EOF }, e );
     }
       {if (true) return expr;}

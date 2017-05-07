@@ -14,6 +14,9 @@ abstract class JAST {
     /** Line in which the source for the AST was found. */
     protected int line;
 
+    /** Column in which the source for the AST was found. */
+    protected int column;
+
     /**
      * Construct an AST node the given its line number in the source file.
      * 
@@ -21,8 +24,9 @@ abstract class JAST {
      *            line in which the source for the AST was found.
      */
 
-    protected JAST(int line) {
+    protected JAST(int line, int column) {
         this.line = line;
+        this.column = column;
     }
 
     /**
@@ -33,6 +37,15 @@ abstract class JAST {
 
     public int line() {
         return line;
+    }
+
+    /**
+     * Return the column in which the source for the AST was found.
+     *
+     * @return the column number.
+     */
+    public int column() {
+        return column;
     }
 
     /**

@@ -58,9 +58,9 @@ class JClassDeclaration extends JAST implements JTypeDecl {
      *            class block.
      */
 
-    public JClassDeclaration(int line, ArrayList<String> mods, String name,
+    public JClassDeclaration(int line, int column, ArrayList<String> mods, String name,
             Type superType, ArrayList<JMember> classBlock) {
-        super(line);
+        super(line, column);
         this.mods = mods;
         this.name = name;
         this.superType = superType;
@@ -125,7 +125,7 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         partial.addClass(mods, qualifiedName, Type.OBJECT.jvmName(), null,
                 false); // Object for superClass, just for now
         thisType = Type.typeFor(partial.toClass());
-        context.addType(line, thisType);
+        context.addType(line, column, thisType);
     }
 
     /**
@@ -147,9 +147,9 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         // Creating a partial class in memory can result in a
         // java.lang.VerifyError if the semantics below are
         // violated, so we can't defer these checks to analyze()
-        thisType.checkAccess(line, superType);
+        thisType.checkAccess(line, column, superType);
         if (superType.isFinal()) {
-            JAST.compilationUnit.reportSemanticError(line,
+            JAST.compilationUnit.reportSemanticError(line, column,
                     "Cannot extend a final type: %s", superType.toString());
         }
 
@@ -220,7 +220,7 @@ class JClassDeclaration extends JAST implements JTypeDecl {
             for (Method method : thisType.abstractMethods()) {
                 methods += "\n" + method;
             }
-            JAST.compilationUnit.reportSemanticError(line,
+            JAST.compilationUnit.reportSemanticError(line, column,
                     "Class must be declared abstract since it defines "
                             + "the following abstract methods: %s", methods);
 

@@ -22,8 +22,8 @@ public class JLiteralDouble extends JExpression {
      *            string representation of the literal.
      */
 
-    public JLiteralDouble(int line, String text){
-        super(line);
+    public JLiteralDouble(int line, int column, String text){
+        super(line, column);
         this.text = text;
     }
 

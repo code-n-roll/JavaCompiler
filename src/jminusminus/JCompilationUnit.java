@@ -81,9 +81,9 @@ class JCompilationUnit extends JAST {
      *            type declarations.
      */
 
-    public JCompilationUnit(String fileName, int line, TypeName packageName,
+    public JCompilationUnit(String fileName, int line, int column, TypeName packageName,
             ArrayList<TypeName> imports, ArrayList<JAST> typeDeclarations) {
-        super(line);
+        super(line, column);
         this.fileName = fileName;
         this.packageName = packageName;
         this.imports = imports;
@@ -123,10 +123,10 @@ class JCompilationUnit extends JAST {
      *            related values.
      */
 
-    public void reportSemanticError(int line, String message,
+    public void reportSemanticError(int line, int column, String message,
             Object... arguments) {
         isInError = true;
-        System.err.printf("%s:%d: ", fileName, line);
+        System.err.printf("%s:%d:%d: ", fileName, line, column);
         System.err.printf(message, arguments);
         System.err.println();
     }
@@ -142,17 +142,19 @@ class JCompilationUnit extends JAST {
 
         // Declare the two implicit types java.lang.Object and
         // java.lang.String
-        context.addType(0, Type.OBJECT);
-        context.addType(0, Type.STRING);
+        context.addType(0, 0, Type.OBJECT);
+        context.addType(0, 0, Type.STRING);
 
         // Declare any imported types
         for (TypeName imported : imports) {
             try {
                 Class<?> classRep = Class.forName(imported.toString());
-                context.addType(imported.line(), Type.typeFor(classRep));
+                context.addType(imported.line(), imported.column(), Type.typeFor(classRep));
             } catch (Exception e) {
                 JAST.compilationUnit.reportSemanticError(imported.line(),
-                        "Unable to find %s", imported.toString());
+                        imported.column(),
+                        "Unable to find %s",
+                        imported.toString());
             }
         }
 

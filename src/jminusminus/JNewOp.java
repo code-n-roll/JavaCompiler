@@ -33,8 +33,8 @@ class JNewOp extends JExpression {
      *            arguments to the constructor.
      */
 
-    public JNewOp(int line, Type type, ArrayList<JExpression> arguments) {
-        super(line);
+    public JNewOp(int line, int column, Type type, ArrayList<JExpression> arguments) {
+        super(line, column);
         this.type = type;
         this.arguments = arguments;
     }
@@ -63,7 +63,7 @@ class JNewOp extends JExpression {
 
         // Can't instantiate an abstract type
         if (type.isAbstract()) {
-            JAST.compilationUnit.reportSemanticError(line(),
+            JAST.compilationUnit.reportSemanticError(line(), column(),
                     "Cannot instantiate an abstract type:" + type.toString());
         }
 
@@ -77,7 +77,7 @@ class JNewOp extends JExpression {
         constructor = type.constructorFor(argTypes);
 
         if (constructor == null) {
-            JAST.compilationUnit.reportSemanticError(line(),
+            JAST.compilationUnit.reportSemanticError(line(),column(),
                     "Cannot find constructor: "
                             + Type.signatureFor(type.toString(), argTypes));
         }

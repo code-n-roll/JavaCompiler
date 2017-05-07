@@ -33,8 +33,8 @@ class JInstanceOfOp
      *                the reference type we are testing for.
      */
 
-    public JInstanceOfOp(int line, JExpression expr, Type typeSpec) {
-        super(line);
+    public JInstanceOfOp(int line, int column, JExpression expr, Type typeSpec) {
+        super(line, column);
         this.expr = expr;
         this.typeSpec = typeSpec;
     }
@@ -54,17 +54,17 @@ class JInstanceOfOp
         expr = (JExpression) expr.analyze(context);
         typeSpec = typeSpec.resolve(context);
         if (!typeSpec.isReference()) {
-            JAST.compilationUnit.reportSemanticError(line(),
+            JAST.compilationUnit.reportSemanticError(line(), column(),
                 "Type argument to instanceof "
                     + "operator must be a reference type");
         } else if (!(expr.type() == Type.NULLTYPE
             || expr.type() == Type.ANY || expr.type().isReference())) {
-            JAST.compilationUnit.reportSemanticError(line(),
+            JAST.compilationUnit.reportSemanticError(line(), column(),
                 "operand to instanceof "
                     + "operator must be a reference type");
         } else if (expr.type().isReference()
             && !typeSpec.isJavaAssignableFrom(expr.type())) {
-            JAST.compilationUnit.reportSemanticError(line(),
+            JAST.compilationUnit.reportSemanticError(line(), column(),
                 "It is impossible for the expression "
                     + "to be an instance of this type");
         }

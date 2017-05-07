@@ -27,9 +27,9 @@ abstract class JBooleanBinaryExpression extends JBinaryExpression {
      *            rhs operand.
      */
 
-    protected JBooleanBinaryExpression(int line, String operator,
+    protected JBooleanBinaryExpression(int line, int column, String operator,
             JExpression lhs, JExpression rhs) {
-        super(line, operator, lhs, rhs);
+        super(line, column, operator, lhs, rhs);
     }
 
     /**
@@ -74,8 +74,8 @@ class JEqualOp extends JBooleanBinaryExpression {
      *            rhs operand.
      */
 
-    public JEqualOp(int line, JExpression lhs, JExpression rhs) {
-        super(line, "==", lhs, rhs);
+    public JEqualOp(int line, int column, JExpression lhs, JExpression rhs) {
+        super(line, column, "==", lhs, rhs);
     }
 
     /**
@@ -90,7 +90,7 @@ class JEqualOp extends JBooleanBinaryExpression {
     public JExpression analyze(Context context) {
         lhs = (JExpression) lhs.analyze(context);
         rhs = (JExpression) rhs.analyze(context);
-        lhs.type().mustMatchExpected(line(), rhs.type());
+        lhs.type().mustMatchExpected(line(), column(), rhs.type());
         type = Type.BOOLEAN;
         return this;
     }
@@ -141,8 +141,8 @@ class JLogicalAndOp extends JBooleanBinaryExpression {
      *            rhs operand.
      */
 
-    public JLogicalAndOp(int line, JExpression lhs, JExpression rhs) {
-        super(line, "&&", lhs, rhs);
+    public JLogicalAndOp(int line, int column, JExpression lhs, JExpression rhs) {
+        super(line, column, "&&", lhs, rhs);
     }
 
     /**
@@ -157,8 +157,8 @@ class JLogicalAndOp extends JBooleanBinaryExpression {
     public JExpression analyze(Context context) {
         lhs = (JExpression) lhs.analyze(context);
         rhs = (JExpression) rhs.analyze(context);
-        lhs.type().mustMatchExpected(line(), Type.BOOLEAN);
-        rhs.type().mustMatchExpected(line(), Type.BOOLEAN);
+        lhs.type().mustMatchExpected(line(), column(), Type.BOOLEAN);
+        rhs.type().mustMatchExpected(line(), column(), Type.BOOLEAN);
         type = Type.BOOLEAN;
         return this;
     }
@@ -210,8 +210,8 @@ class JLogicalOrOp extends JBooleanBinaryExpression {
      *            rhs operand.
      */
 
-    public JLogicalOrOp(int line, JExpression lhs, JExpression rhs) {
-        super(line, "||", lhs, rhs);
+    public JLogicalOrOp(int line, int column, JExpression lhs, JExpression rhs) {
+        super(line, column, "||", lhs, rhs);
     }
 
     /**
@@ -226,8 +226,8 @@ class JLogicalOrOp extends JBooleanBinaryExpression {
     public JExpression analyze(Context context) {
         lhs = (JExpression) lhs.analyze(context);
         rhs = (JExpression) rhs.analyze(context);
-        lhs.type().mustMatchExpected(line(), Type.BOOLEAN);
-        rhs.type().mustMatchExpected(line(), Type.BOOLEAN);
+        lhs.type().mustMatchExpected(line(), column(), Type.BOOLEAN);
+        rhs.type().mustMatchExpected(line(), column(), Type.BOOLEAN);
         type = Type.BOOLEAN;
         return this;
     }
@@ -278,8 +278,8 @@ class JNotEqualOp extends JBooleanBinaryExpression {
      *            rhs operand.
      */
 
-    public JNotEqualOp(int line, JExpression lhs, JExpression rhs) {
-        super(line, "!=", lhs, rhs);
+    public JNotEqualOp(int line, int column, JExpression lhs, JExpression rhs) {
+        super(line, column, "!=", lhs, rhs);
     }
 
     /**
@@ -294,7 +294,7 @@ class JNotEqualOp extends JBooleanBinaryExpression {
     public JExpression analyze(Context context) {
         lhs = (JExpression) lhs.analyze(context);
         rhs = (JExpression) rhs.analyze(context);
-        lhs.type().mustMatchExpected(line(), rhs.type());
+        lhs.type().mustMatchExpected(line(), column(), rhs.type());
         type = Type.BOOLEAN;
         return this;
     }

@@ -25,9 +25,9 @@ abstract class JAssignment extends JBinaryExpression {
      *            the rhs operand.
      */
 
-    public JAssignment(int line, String operator, JExpression lhs,
+    public JAssignment(int line, int column, String operator, JExpression lhs,
             JExpression rhs) {
-        super(line, operator, lhs, rhs);
+        super(line, column, operator, lhs, rhs);
     }
 
 }
@@ -52,8 +52,8 @@ class JAssignOp extends JAssignment {
      *            rhs operand.
      */
 
-    public JAssignOp(int line, JExpression lhs, JExpression rhs) {
-        super(line, "=", lhs, rhs);
+    public JAssignOp(int line, int column, JExpression lhs, JExpression rhs) {
+        super(line, column, "=", lhs, rhs);
     }
 
     /**
@@ -67,13 +67,13 @@ class JAssignOp extends JAssignment {
 
     public JExpression analyze(Context context) {
         if (!(lhs instanceof JLhs)) {
-            JAST.compilationUnit.reportSemanticError(line(),
+            JAST.compilationUnit.reportSemanticError(line(), column(),
                     "Illegal lhs for assignment");
         } else {
             lhs = (JExpression) ((JLhs) lhs).analyzeLhs(context);
         }
         rhs = (JExpression) rhs.analyze(context);
-        rhs.type().mustMatchExpected(line(), lhs.type());
+        rhs.type().mustMatchExpected(line(), column(), lhs.type());
         type = rhs.type();
         if (lhs instanceof JVariable) {
             IDefn defn = ((JVariable) lhs).iDefn();
@@ -128,8 +128,8 @@ class JPlusAssignOp extends JAssignment {
      *            the rhs operand.
      */
 
-    public JPlusAssignOp(int line, JExpression lhs, JExpression rhs) {
-        super(line, "+=", lhs, rhs);
+    public JPlusAssignOp(int line, int column, JExpression lhs, JExpression rhs) {
+        super(line, column, "+=", lhs, rhs);
     }
 
     /**
@@ -143,7 +143,7 @@ class JPlusAssignOp extends JAssignment {
 
     public JExpression analyze(Context context) {
         if (!(lhs instanceof JLhs)) {
-            JAST.compilationUnit.reportSemanticError(line(),
+            JAST.compilationUnit.reportSemanticError(line(), column(),
                     "Illegal lhs for assignment");
 	    return this;
         } else {
@@ -151,16 +151,16 @@ class JPlusAssignOp extends JAssignment {
         }
         rhs = (JExpression) rhs.analyze(context);
         if (lhs.type().equals(Type.INT)) {
-            rhs.type().mustMatchExpected(line(), Type.INT);
+            rhs.type().mustMatchExpected(line(), column(), Type.INT);
             type = Type.INT;
         } else if (lhs.type().equals(Type.DOUBLE)){
-            rhs.type().mustMatchExpected(line(), Type.DOUBLE);
+            rhs.type().mustMatchExpected(line(), column(), Type.DOUBLE);
             type = Type.DOUBLE;
         } else if (lhs.type().equals(Type.STRING)) {
-            rhs = (new JStringConcatenationOp(line, lhs, rhs)).analyze(context);
+            rhs = (new JStringConcatenationOp(line, column, lhs, rhs)).analyze(context);
             type = Type.STRING;
         } else {
-            JAST.compilationUnit.reportSemanticError(line(),
+            JAST.compilationUnit.reportSemanticError(line(), column(),
                     "Invalid lhs type for +=: " + lhs.type());
         }
         return this;
@@ -215,8 +215,8 @@ class JMinusAssignOp extends JAssignment{
      *            the rhs operand.
      */
 
-    public JMinusAssignOp(int line, JExpression lhs, JExpression rhs) {
-        super(line, "-=", lhs, rhs);
+    public JMinusAssignOp(int line, int column, JExpression lhs, JExpression rhs) {
+        super(line, column, "-=", lhs, rhs);
     }
 
     /**
@@ -229,7 +229,7 @@ class JMinusAssignOp extends JAssignment{
 
     public JExpression analyze(Context context) {
         if (!(lhs instanceof JLhs)){
-            JAST.compilationUnit.reportSemanticError(line(),
+            JAST.compilationUnit.reportSemanticError(line(), column(),
                     "Illegal lhs for assignment");
             return this;
         } else {
@@ -237,13 +237,13 @@ class JMinusAssignOp extends JAssignment{
         }
         rhs = (JExpression) rhs.analyze(context);
         if (lhs.type().equals(Type.INT)) {
-            rhs.type().mustMatchExpected(line(), Type.INT);
+            rhs.type().mustMatchExpected(line(), column(), Type.INT);
             type = Type.INT;
         } else if (lhs.type().equals(Type.DOUBLE)){
-            rhs.type().mustMatchExpected(line(), Type.DOUBLE);
+            rhs.type().mustMatchExpected(line(), column(), Type.DOUBLE);
             type = Type.DOUBLE;
         } else {
-            JAST.compilationUnit.reportSemanticError(line(),
+            JAST.compilationUnit.reportSemanticError(line(), column(),
                     "Invalid lhs type for -=: " + lhs.type());
         }
         return this;
@@ -293,8 +293,8 @@ class JStarAssignOp extends JAssignment{
      *            the rhs operand.
      */
 
-    public JStarAssignOp(int line, JExpression lhs, JExpression rhs) {
-        super(line, "*=", lhs, rhs);
+    public JStarAssignOp(int line, int column, JExpression lhs, JExpression rhs) {
+        super(line, column, "*=", lhs, rhs);
     }
 
     /**
@@ -307,7 +307,7 @@ class JStarAssignOp extends JAssignment{
 
     public JExpression analyze(Context context) {
         if (!(lhs instanceof JLhs)){
-            JAST.compilationUnit.reportSemanticError(line(),
+            JAST.compilationUnit.reportSemanticError(line(), column(),
                     "Illegal lhs for assignment");
             return this;
         } else {
@@ -315,13 +315,13 @@ class JStarAssignOp extends JAssignment{
         }
         rhs = (JExpression) rhs.analyze(context);
         if (lhs.type().equals(Type.INT)) {
-            rhs.type().mustMatchExpected(line(), Type.INT);
+            rhs.type().mustMatchExpected(line(), column(), Type.INT);
             type = Type.INT;
         } else if (lhs.type().equals(Type.DOUBLE)){
-            rhs.type().mustMatchExpected(line(), Type.DOUBLE);
+            rhs.type().mustMatchExpected(line(), column(), Type.DOUBLE);
             type = Type.DOUBLE;
         } else {
-            JAST.compilationUnit.reportSemanticError(line(),
+            JAST.compilationUnit.reportSemanticError(line(), column(),
                     "Invalid lhs type for *=: " + lhs.type());
         }
         return this;
@@ -371,8 +371,8 @@ class JDivAssignOp extends JAssignment{
      *            the rhs operand.
      */
 
-    public JDivAssignOp(int line, JExpression lhs, JExpression rhs) {
-        super(line, "/=", lhs, rhs);
+    public JDivAssignOp(int line, int column, JExpression lhs, JExpression rhs) {
+        super(line, column, "/=", lhs, rhs);
     }
 
     /**
@@ -385,7 +385,7 @@ class JDivAssignOp extends JAssignment{
 
     public JExpression analyze(Context context) {
         if (!(lhs instanceof JLhs)){
-            JAST.compilationUnit.reportSemanticError(line(),
+            JAST.compilationUnit.reportSemanticError(line(), column(),
                     "Illegal lhs for assignment");
             return this;
         } else {
@@ -393,13 +393,13 @@ class JDivAssignOp extends JAssignment{
         }
         rhs = (JExpression) rhs.analyze(context);
         if (lhs.type().equals(Type.INT)) {
-            rhs.type().mustMatchExpected(line(), Type.INT);
+            rhs.type().mustMatchExpected(line(), column(), Type.INT);
             type = Type.INT;
         } else if (lhs.type().equals(Type.DOUBLE)){
-            rhs.type().mustMatchExpected(line(), Type.DOUBLE);
+            rhs.type().mustMatchExpected(line(), column(), Type.DOUBLE);
             type = Type.DOUBLE;
         } else {
-            JAST.compilationUnit.reportSemanticError(line(),
+            JAST.compilationUnit.reportSemanticError(line(), column(),
                     "Invalid lhs type for /=: " + lhs.type());
         }
         return this;
@@ -449,8 +449,8 @@ class JModAssignOp extends JAssignment{
      *            the rhs operand.
      */
 
-    public JModAssignOp(int line, JExpression lhs, JExpression rhs) {
-        super(line, "%=", lhs, rhs);
+    public JModAssignOp(int line, int column, JExpression lhs, JExpression rhs) {
+        super(line, column, "%=", lhs, rhs);
     }
 
     /**
@@ -463,7 +463,7 @@ class JModAssignOp extends JAssignment{
 
     public JExpression analyze(Context context) {
         if (!(lhs instanceof JLhs)){
-            JAST.compilationUnit.reportSemanticError(line(),
+            JAST.compilationUnit.reportSemanticError(line(), column(),
                     "Illegal lhs for assignment");
             return this;
         } else {
@@ -471,13 +471,13 @@ class JModAssignOp extends JAssignment{
         }
         rhs = (JExpression) rhs.analyze(context);
         if (lhs.type().equals(Type.INT)) {
-            rhs.type().mustMatchExpected(line(), Type.INT);
+            rhs.type().mustMatchExpected(line(), column(), Type.INT);
             type = Type.INT;
         } else if (lhs.type().equals(Type.DOUBLE)){
-            rhs.type().mustMatchExpected(line(), Type.DOUBLE);
+            rhs.type().mustMatchExpected(line(), column(), Type.DOUBLE);
             type = Type.DOUBLE;
         } else {
-            JAST.compilationUnit.reportSemanticError(line(),
+            JAST.compilationUnit.reportSemanticError(line(), column(),
                     "Invalid lhs type for *=: " + lhs.type());
         }
         return this;

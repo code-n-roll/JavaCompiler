@@ -34,9 +34,9 @@ class JVariableDeclaration extends JStatement {
      *            variable declarators.
      */
 
-    public JVariableDeclaration(int line, ArrayList<String> mods,
+    public JVariableDeclaration(int line, int column, ArrayList<String> mods,
             ArrayList<JVariableDeclarator> decls) {
-        super(line);
+        super(line, column);
         this.mods = mods;
         this.decls = decls;
         initializations = new ArrayList<JStatement>();
@@ -74,22 +74,22 @@ class JVariableDeclaration extends JStatement {
             IDefn previousDefn = context.lookup(decl.name());
             if (previousDefn != null
                     && previousDefn instanceof LocalVariableDefn) {
-                JAST.compilationUnit.reportSemanticError(decl.line(),
+                JAST.compilationUnit.reportSemanticError(decl.line(),decl.column(),
                         "The name " + decl.name()
                                 + " overshadows another local variable.");
             }
 
             // Then declare it in the local context
-            context.addEntry(decl.line(), decl.name(), defn);
+            context.addEntry(decl.line(), decl.column(), decl.name(), defn);
 
             // All initializations must be turned into assignment
             // statements and analyzed
             if (decl.initializer() != null) {
                 defn.initialize();
-                JAssignOp assignOp = new JAssignOp(decl.line(), new JVariable(
-                        decl.line(), decl.name()), decl.initializer());
+                JAssignOp assignOp = new JAssignOp(decl.line(), decl.column(), new JVariable(
+                        decl.line(),decl.column(), decl.name()), decl.initializer());
                 assignOp.isStatementExpression = true;
-                initializations.add(new JStatementExpression(decl.line(),
+                initializations.add(new JStatementExpression(decl.line(), decl.column(),
                         assignOp).analyze(context));
             }
         }

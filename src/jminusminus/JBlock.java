@@ -28,8 +28,8 @@ class JBlock extends JStatement {
      *            list of statements forming the block body.
      */
 
-    public JBlock(int line, ArrayList<JStatement> statements) {
-        super(line);
+    public JBlock(int line, int column, ArrayList<JStatement> statements) {
+        super(line, column);
         this.statements = statements;
     }
 

@@ -17,8 +17,8 @@ class JWildExpression extends JExpression {
      *            source file.
      */
 
-    public JWildExpression(int line) {
-        super(line);
+    public JWildExpression(int line, int column) {
+        super(line, column);
     }
 
     /**

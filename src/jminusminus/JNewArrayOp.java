@@ -29,8 +29,8 @@ class JNewArrayOp extends JExpression {
      *            a list of dimension expressions.
      */
 
-    public JNewArrayOp(int line, Type typeSpec, ArrayList<JExpression> dimExprs) {
-        super(line);
+    public JNewArrayOp(int line, int column, Type typeSpec, ArrayList<JExpression> dimExprs) {
+        super(line, column);
         this.typeSpec = typeSpec;
         this.dimExprs = dimExprs;
     }
@@ -48,7 +48,7 @@ class JNewArrayOp extends JExpression {
         type = typeSpec.resolve(context);
         for (int i = 0; i < dimExprs.size(); i++) {
             dimExprs.set(i, dimExprs.get(i).analyze(context));
-            dimExprs.get(i).type().mustMatchExpected(line, Type.INT);
+            dimExprs.get(i).type().mustMatchExpected(line, column, Type.INT);
         }
         return this;
     }

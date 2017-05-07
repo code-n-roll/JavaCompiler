@@ -24,9 +24,9 @@ abstract class JComparison extends JBooleanBinaryExpression {
      *            the rhs operand.
      */
 
-    protected JComparison(int line, String operator, JExpression lhs,
+    protected JComparison(int line, int column, String operator, JExpression lhs,
             JExpression rhs) {
-        super(line, operator, lhs, rhs);
+        super(line, column, operator, lhs, rhs);
     }
 
     /**
@@ -41,8 +41,8 @@ abstract class JComparison extends JBooleanBinaryExpression {
     public JExpression analyze(Context context) {
         lhs = (JExpression) lhs.analyze(context);
         rhs = (JExpression) rhs.analyze(context);
-        lhs.type().mustMatchExpected(line(), Type.INT);
-        rhs.type().mustMatchExpected(line(), lhs.type());
+        lhs.type().mustMatchExpected(line(), column(), Type.INT);
+        rhs.type().mustMatchExpected(line(), column(), lhs.type());
         type = Type.BOOLEAN;
         return this;
     }
@@ -69,8 +69,8 @@ class JGreaterThanOp extends JComparison {
      *            rhs operand.
      */
 
-    public JGreaterThanOp(int line, JExpression lhs, JExpression rhs) {
-        super(line, ">", lhs, rhs);
+    public JGreaterThanOp(int line, int column, JExpression lhs, JExpression rhs) {
+        super(line, column, ">", lhs, rhs);
     }
 
     /**
@@ -96,8 +96,8 @@ class JGreaterThanOp extends JComparison {
 }
 
 class JLessThanOp extends JComparison {
-    public JLessThanOp(int line, JExpression lhs, JExpression rhs){
-        super(line, "<", lhs, rhs);
+    public JLessThanOp(int line, int column, JExpression lhs, JExpression rhs){
+        super(line, column, "<", lhs, rhs);
     }
 
     public void codegen(CLEmitter output, String targetLabel, boolean onTrue){
@@ -131,8 +131,8 @@ class JLessEqualOp extends JComparison {
      *            rhs operand.
      */
 
-    public JLessEqualOp(int line, JExpression lhs, JExpression rhs) {
-        super(line, "<=", lhs, rhs);
+    public JLessEqualOp(int line, int column, JExpression lhs, JExpression rhs) {
+        super(line, column, "<=", lhs, rhs);
     }
 
     /**
@@ -177,8 +177,8 @@ class JGreaterEqualOp extends JComparison {
      *            rhs operand.
      */
 
-    public JGreaterEqualOp(int line, JExpression lhs, JExpression rhs) {
-        super(line, ">=", lhs, rhs);
+    public JGreaterEqualOp(int line, int column, JExpression lhs, JExpression rhs) {
+        super(line, column,">=", lhs, rhs);
     }
 
     /**

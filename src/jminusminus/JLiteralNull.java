@@ -17,8 +17,8 @@ class JLiteralNull extends JExpression {
      *            line in which the literal occurs in the source file.
      */
 
-    public JLiteralNull(int line) {
-        super(line);
+    public JLiteralNull(int line, int column) {
+        super(line, column);
     }
 
     /**

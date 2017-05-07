@@ -29,9 +29,9 @@ class JArrayInitializer
      *                initializations.
      */
 
-    public JArrayInitializer(int line, Type expected,
+    public JArrayInitializer(int line, int column, Type expected,
         ArrayList<JExpression> initials) {
-        super(line);
+        super(line, column);
         type = expected;
         this.initials = initials;
     }
@@ -49,7 +49,7 @@ class JArrayInitializer
     public JExpression analyze(Context context) {
         type = type.resolve(context);
         if (!type.isArray()) {
-            JAST.compilationUnit.reportSemanticError(line,
+            JAST.compilationUnit.reportSemanticError(line,column,
                 "Cannot initialize a " + type.toString()
                     + " with an array sequence {...}");
             return this; // un-analyzed
@@ -59,7 +59,7 @@ class JArrayInitializer
             JExpression component = initials.get(i);
             initials.set(i, component = component.analyze(context));
             if (!(component instanceof JArrayInitializer)) {
-                component.type().mustMatchExpected(line,
+                component.type().mustMatchExpected(line,column,
                     componentType);
             }
         }
@@ -79,7 +79,7 @@ class JArrayInitializer
         Type componentType = type.componentType();
 
         // Code to push array length.
-        new JLiteralInt(line, String.valueOf(initials.size()))
+        new JLiteralInt(line, column, String.valueOf(initials.size()))
             .codegen(output);
 
         // Code to create the (empty) array
@@ -96,7 +96,7 @@ class JArrayInitializer
             output.addNoArgInstruction(DUP);
 
             // Code to push index for store
-            new JLiteralInt(line, String.valueOf(i)).codegen(output);
+            new JLiteralInt(line, column, String.valueOf(i)).codegen(output);
 
             // Code to compute the initial value.
             initExpr.codegen(output);

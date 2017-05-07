@@ -22,8 +22,8 @@ class JStatementExpression extends JStatement {
      *            the expression.
      */
 
-    public JStatementExpression(int line, JExpression expr) {
-        super(line);
+    public JStatementExpression(int line, int column, JExpression expr) {
+        super(line, column);
         this.expr = expr;
     }
 

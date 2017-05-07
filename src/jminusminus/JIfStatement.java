@@ -33,9 +33,9 @@ class JIfStatement extends JStatement {
      *            else clause.
      */
 
-    public JIfStatement(int line, JExpression condition, JStatement thenPart,
+    public JIfStatement(int line, int column, JExpression condition, JStatement thenPart,
             JStatement elsePart) {
-        super(line);
+        super(line, column);
         this.condition = condition;
         this.thenPart = thenPart;
         this.elsePart = elsePart;
@@ -52,7 +52,7 @@ class JIfStatement extends JStatement {
 
     public JStatement analyze(Context context) {
         condition = (JExpression) condition.analyze(context);
-        condition.type().mustMatchExpected(line(), Type.BOOLEAN);
+        condition.type().mustMatchExpected(line(), column(), Type.BOOLEAN);
         thenPart = (JStatement) thenPart.analyze(context);
         if (elsePart != null) {
             elsePart = (JStatement) elsePart.analyze(context);

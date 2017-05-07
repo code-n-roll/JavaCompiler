@@ -36,11 +36,11 @@ class JConstructorDeclaration extends JMethodDeclaration implements JMember {
      *            constructor body.
      */
 
-    public JConstructorDeclaration(int line, ArrayList<String> mods,
+    public JConstructorDeclaration(int line, int column, ArrayList<String> mods,
             String name, ArrayList<JFormalParameter> params, JBlock body)
 
     {
-        super(line, mods, name, Type.CONSTRUCTOR, params, body);
+        super(line, column, mods, name, Type.CONSTRUCTOR, params, body);
     }
 
     /**
@@ -56,10 +56,10 @@ class JConstructorDeclaration extends JMethodDeclaration implements JMember {
     public void preAnalyze(Context context, CLEmitter partial) {
         super.preAnalyze(context, partial);
         if (isStatic) {
-            JAST.compilationUnit.reportSemanticError(line(),
+            JAST.compilationUnit.reportSemanticError(line(), column(),
                     "Constructor cannot be declared static");
         } else if (isAbstract) {
-            JAST.compilationUnit.reportSemanticError(line(),
+            JAST.compilationUnit.reportSemanticError(line(), column(),
                     "Constructor cannot be declared abstract");
         }
         if (body.statements().size() > 0
@@ -105,7 +105,7 @@ class JConstructorDeclaration extends JMethodDeclaration implements JMember {
 		new LocalVariableDefn(param.type(),
 				      this.context.nextOffset());
             defn.initialize();
-            this.context.addEntry(param.line(), param.name(), defn);
+            this.context.addEntry(param.line(), param.column(), param.name(), defn);
         }
         if (body != null) {
             body = body.analyze(this.context);

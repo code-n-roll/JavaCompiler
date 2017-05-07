@@ -36,8 +36,8 @@ class JCastOp extends JExpression {
      *            the expression we're casting.
      */
 
-    public JCastOp(int line, Type cast, JExpression expr) {
-        super(line);
+    public JCastOp(int line, int column, Type cast, JExpression expr) {
+        super(line, column);
         this.cast = cast;
         this.expr = expr;
         conversions = new Conversions();
@@ -64,7 +64,7 @@ class JCastOp extends JExpression {
             converter = new NarrowReference(cast);
         } else if ((converter = conversions.get(expr.type(), cast)) != null) {
         } else {
-            JAST.compilationUnit.reportSemanticError(line, "Cannot cast a "
+            JAST.compilationUnit.reportSemanticError(line, column, "Cannot cast a "
                     + expr.type().toString() + " to a " + cast.toString());
         }
         return this;

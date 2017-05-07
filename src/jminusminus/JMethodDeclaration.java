@@ -62,12 +62,12 @@ class JMethodDeclaration
      *                method body.
      */
 
-    public JMethodDeclaration(int line, ArrayList<String> mods,
+    public JMethodDeclaration(int line, int column, ArrayList<String> mods,
         String name, Type returnType,
         ArrayList<JFormalParameter> params, JBlock body)
 
     {
-        super(line);
+        super(line, column);
         this.mods = mods;
         this.name = name;
         this.returnType = returnType;
@@ -99,16 +99,16 @@ class JMethodDeclaration
 
         // Check proper local use of abstract
         if (isAbstract && body != null) {
-            JAST.compilationUnit.reportSemanticError(line(),
+            JAST.compilationUnit.reportSemanticError(line(),column(),
                 "abstract method cannot have a body");
         } else if (body == null && !isAbstract) {
-            JAST.compilationUnit.reportSemanticError(line(),
+            JAST.compilationUnit.reportSemanticError(line(),column(),
                 "Method with null body must be abstarct");
         } else if (isAbstract && isPrivate) {
-            JAST.compilationUnit.reportSemanticError(line(),
+            JAST.compilationUnit.reportSemanticError(line(),column(),
                 "private method cannot be declared abstract");
         } else if (isAbstract && isStatic) {
-            JAST.compilationUnit.reportSemanticError(line(),
+            JAST.compilationUnit.reportSemanticError(line(),column(),
                 "static method cannot be declared abstract");
         }
 
@@ -152,12 +152,12 @@ class JMethodDeclaration
             LocalVariableDefn defn = new LocalVariableDefn(param.type(), 
                 this.context.nextOffset());
             defn.initialize();
-            this.context.addEntry(param.line(), param.name(), defn);
+            this.context.addEntry(param.line(), param.column(), param.name(), defn);
         }
         if (body != null) {
             body = body.analyze(this.context);
 	    if (returnType!=Type.VOID && ! methodContext.methodHasReturn()){
-		JAST.compilationUnit.reportSemanticError(line(),
+		JAST.compilationUnit.reportSemanticError(line(),column(),
 		    "Non-void method must have a return statement");
 	    }
         }

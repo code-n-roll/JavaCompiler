@@ -31,9 +31,9 @@ class JArrayExpression
      *                the index expression.
      */
 
-    public JArrayExpression(int line, JExpression theArray,
+    public JArrayExpression(int line, int column, JExpression theArray,
         JExpression indexExpr) {
-        super(line);
+        super(line, column);
         this.theArray = theArray;
         this.indexExpr = indexExpr;
     }
@@ -51,13 +51,13 @@ class JArrayExpression
         theArray = (JExpression) theArray.analyze(context);
         indexExpr = (JExpression) indexExpr.analyze(context);
         if (!(theArray.type().isArray())) {
-            JAST.compilationUnit.reportSemanticError(line(),
+            JAST.compilationUnit.reportSemanticError(line(),column(),
                 "attempt to index a non-array object");
             this.type = Type.ANY;
         } else {
             this.type = theArray.type().componentType();
         }
-        indexExpr.type().mustMatchExpected(line(), Type.INT);
+        indexExpr.type().mustMatchExpected(line(),column(), Type.INT);
         return this;
     }
 

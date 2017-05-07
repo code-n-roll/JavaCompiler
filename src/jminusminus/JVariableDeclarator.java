@@ -34,11 +34,11 @@ class JVariableDeclarator extends JAST {
      *            initializer.
      */
 
-    public JVariableDeclarator(int line, String name, Type type,
+    public JVariableDeclarator(int line, int column, String name, Type type,
             JExpression initializer)
 
     {
-        super(line);
+        super(line, column);
         this.name = name;
         this.type = type;
         this.initializer = initializer;

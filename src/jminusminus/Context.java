@@ -81,9 +81,10 @@ class Context {
      *            and its definition.
      */
 
-    public void addEntry(int line, String name, IDefn definition) {
+    public void addEntry(int line, int column, String name, IDefn definition) {
         if (entries.containsKey(name)) {
-            JAST.compilationUnit.reportSemanticError(line, "redefining name: "
+            JAST.compilationUnit.reportSemanticError(line, column,
+                    "redefining name: "
                     + name);
         } else {
             entries.put(name, definition);
@@ -129,11 +130,11 @@ class Context {
      *            the type we are declaring.
      */
 
-    public void addType(int line, Type type) {
+    public void addType(int line, int column, Type type) {
         IDefn iDefn = new TypeNameDefn(type);
-        compilationUnitContext.addEntry(line, type.simpleName(), iDefn);
+        compilationUnitContext.addEntry(line, column, type.simpleName(), iDefn);
         if (!type.toString().equals(type.simpleName())) {
-            compilationUnitContext.addEntry(line, type.toString(), iDefn);
+            compilationUnitContext.addEntry(line, column, type.toString(), iDefn);
         }
     }
 
